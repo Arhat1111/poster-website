@@ -1,0 +1,11 @@
+INKWAVES V8.6 — ONE REQUIRED FIREBASE FIX
+
+If checkout previously showed "Missing or insufficient permissions", your live Firestore rules are still the older version that blocks customers from creating checkout orders.
+
+1. Open Firebase Console.
+2. Firestore Database -> Rules.
+3. Open FIREBASE_ORDER_RULES.txt from this package.
+4. Copy the rule block beginning with: rules_version = '2';
+5. Replace the old rules and click Publish.
+
+V8.6 also contains a payment fail-safe: Razorpay will still open if order syncing is denied, rather than blocking the customer's payment. However, Admin cross-device order details require the V8.6 rules to be published.

@@ -1,7 +1,11 @@
-INKWAVES FIRESTORE RULES — V8.5
+INKWAVES FIRESTORE RULES — V8.6
 
-Paste the rules below into Firebase Console -> Firestore -> Rules and click Publish.
-These rules keep products/categories public-readable and admin-editable, while allowing customers to CREATE checkout orders without being able to read or edit other orders.
+IMPORTANT: GitHub cannot publish Firebase Security Rules. Paste ONLY the rule block below into:
+Firebase Console -> Firestore Database -> Rules -> Publish
+
+This fixes the checkout error "Missing or insufficient permissions".
+Customers can CREATE pending orders only. They cannot read, edit, mark paid, or delete orders.
+Only the authorized InkWaves Firebase admin can read/update/delete orders and catalog data.
 
 rules_version = '2';
 service cloud.firestore {
@@ -36,7 +40,7 @@ service cloud.firestore {
         && request.resource.data.customer.phone is string
         && request.resource.data.items is list
         && request.resource.data.items.size() > 0
-        && request.resource.data.items.size() <= 30
+        && request.resource.data.items.size() <= 50
         && request.resource.data.totals is map
         && request.resource.data.totals.total is number
         && request.resource.data.totals.total > 0

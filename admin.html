@@ -51,8 +51,8 @@
 window.INKWAVE_DEFAULT_DATA = {"settings":{"announcement":"","heroKicker":"POSTERS THAT INSPIRE · STUDENT-BUILT AT NITK SURATHKAL","heroTitle":"MAKE YOUR WALL","heroAccent":"IMPOSSIBLE TO IGNORE.","heroDescription":"Explore hundreds of posters across music, anime, sport, cinema, cars, space, motivation and more — or build a custom print of your own.","customTitle":"BUILD A POSTER THAT IS COMPLETELY YOURS.","customDescription":"Upload your photo, artwork or design, choose A6 to A3, preview it instantly and order it on 300 GSM matte laminated paper.","categoriesTitle":"SHOP BY CATEGORIES","shopTitle":"INKWAVES STUDIO PICKS","aboutTitle":"FROM A HOSTEL ROOM TO YOUR WALL.","aboutBody":"InkWave began as a college startup at NITK Surathkal with one simple idea: make expressive, affordable wall art that students can use to make temporary rooms feel personal.","email":"hello@inkwave.in","instagram":"https://instagram.com","couponCode":"NITK10","couponPercent":10,"freeShippingAbove":0,"shippingFee":0},"heroSlides":[{"image":"https://drive.google.com/thumbnail?id=1Oh0Vk3gckZByr8NMaXDldCCCIfirRsG2&sz=w1200","label":"MUSIC ARTISTS","caption":"Artists, albums and loud walls · from ₹19","accent":"#9f8cff"},{"image":"https://drive.google.com/thumbnail?id=14EGVCM6Of1W0N-JoqYj8ydiyaChx8yJv&sz=w1200","label":"FORMULA 1","caption":"Race-day energy, legends and paddock graphics · from ₹19","accent":"#ff5147"},{"image":"https://drive.google.com/thumbnail?id=1k4UCYjUtrA6lsL6cNCwMRrKql3hslnSp&sz=w1200","label":"ANIME","caption":"Manga energy, heroes and iconic frames · from ₹19","accent":"#ff8fb1"},{"image":"https://drive.google.com/thumbnail?id=114KOdsHkyguPEYOtkXwJbJ_KYAudJQEF&sz=w1200","label":"FOOTBALL","caption":"Clubs, legends and the beautiful game · from ₹19","accent":"#4fc07a"},{"image":"https://drive.google.com/thumbnail?id=1OM4qk7A8jlT2U7ExzxE9eH_krdeg9NDl&sz=w1200","label":"MOVIES","caption":"Cinema, characters and frame-worthy scenes · from ₹19","accent":"#f1c755"},{"image":"https://drive.google.com/thumbnail?id=1RSIrnKK1P9Z3A6luzBTh_gyveRGM81AE&sz=w1200","label":"AESTHETIC","caption":"Soft colour, moodboards and design-led prints · from ₹19","accent":"#f4b6d7"},{"image":"https://drive.google.com/thumbnail?id=1zBKE7Qn-SBlIUoYJWzyjpaVIqi8GvL44&sz=w1200","label":"CARS","caption":"Automotive icons, machines and garage walls · from ₹19","accent":"#67c4ff"},{"image":"https://drive.google.com/thumbnail?id=1hSE6BQokxwwFi0oY09x02aemR6W7lkih&sz=w1200","label":"CRICKET","caption":"Indian cricket, icons and stadium energy · from ₹19","accent":"#5b9cff"}],"categories":[],"products":[],"commerce":{"sizes":{"A3":{"price":99,"detail":"297 × 420 mm","offer":"Buy 2, get 1 free","groupQty":3,"payQty":2},"A4":{"price":69,"detail":"210 × 297 mm","offer":"Buy 3, get 2 free","groupQty":5,"payQty":3},"A5":{"price":39,"detail":"148 × 210 mm","offer":"Buy 4, get 3 free","groupQty":7,"payQty":4},"A6":{"price":19,"detail":"105 × 148 mm","offer":"Buy 6, get 4 free · or 20 for ₹200","groupQty":10,"payQty":6,"bundle20Price":200}},"finishes":{"Matte Laminated":{"price":0,"label":"Matte laminated"}},"frames":{},"captionPrice":0},"reviews":[{"name":"YOUR CUSTOMER","location":"City","rating":5,"text":"Add a real customer review from the InkWave admin panel.","product":"Review placeholder"},{"name":"YOUR CUSTOMER","location":"City","rating":5,"text":"Replace this placeholder with feedback from a real InkWave order.","product":"Review placeholder"},{"name":"YOUR CUSTOMER","location":"City","rating":5,"text":"Use the Reviews tab in the control panel to publish genuine customer feedback.","product":"Review placeholder"},{"name":"YOUR CUSTOMER","location":"City","rating":5,"text":"You can edit the name, city, rating, product and review text without touching code.","product":"Review placeholder"}]};
 
 </script>
-<script type="module" src="firebase-store.js?v=85"></script>
-<script src="payment-config.js?v=85"></script>
+<script type="module" src="firebase-store.js?v=80"></script>
+<script src="payment-config.js?v=82"></script>
 <script>
 const ADMIN_PASSWORD='InkWaves@2026'; // Used only by the legacy PHP order tools, never for Firebase login.
 let token='';
@@ -62,7 +62,7 @@ const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const money=v=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(v)||0);
 const clone=v=>JSON.parse(JSON.stringify(v));
 const HOSTED=(location.protocol==='http:'||location.protocol==='https:');
-const ADMIN_API_BASE=String(window.INKWAVES_RAZORPAY_SYNC_API_BASE||window.INKWAVES_ADMIN_API_BASE||'').replace(/\/$/,'');
+const ADMIN_API_BASE=String(window.INKWAVES_ADMIN_API_BASE||window.INKWAVES_PAYMENT_API_BASE||'').replace(/\/$/,'');
 function adminApiUrl(path){const p=path.startsWith('/')?path:`/${path}`;return `${ADMIN_API_BASE}${p}`}
 function publicAssetUrl(value){return String(value||'')}
 async function waitFirebase(){
@@ -142,9 +142,11 @@ async function loadDashboard(){
     const user=fb.currentUser();
     if(!fb.isAdminUser(user))return;
     data=await api('/api/admin/site');
-    try{orders=await fb.loadCheckoutOrders();orders=await reconcilePayments(orders)}catch{orders=[]}
+    try{
+      const orderResult=await api('/api/admin/orders');
+      orders=Array.isArray(orderResult)?orderResult:(Array.isArray(orderResult?.orders)?orderResult.orders:[]);
+    }catch{orders=[]}
     $('#loginCard').hidden=true;$('#dashboard').hidden=false;$('#logoutBtn').hidden=false;renderAll();
-    clearInterval(window.__inkwavesOrderRefresh);window.__inkwavesOrderRefresh=setInterval(()=>{if(!$('#dashboard').hidden)loadOrders().catch(()=>{})},30000);
     status('FIREBASE V7.3 SYNC ONLINE · changes are shared with every device.');
   }catch(e){
     $('#loginCard').hidden=false;$('#dashboard').hidden=true;$('#logoutBtn').hidden=true;
@@ -153,72 +155,17 @@ async function loadDashboard(){
   }
 }
 function renderAll(){renderOrders();renderContent();renderHero();renderCategories();renderNewProductForm();renderProducts();renderReviewsAdmin();renderCommerce()}
-async function fetchRecentRazorpayPayments(){
-  if(!ADMIN_API_BASE)return [];
-  const fb=await waitFirebase();
-  const user=fb.currentUser();
-  if(!user)return [];
-  const idToken=await user.getIdToken();
-  const r=await fetch(adminApiUrl('/api/admin/recent-payments'),{headers:{Authorization:`Bearer ${idToken}`},cache:'no-store'});
-  const j=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(j.error||'Could not read Razorpay payments.');
-  return Array.isArray(j.payments)?j.payments:[];
-}
-function normalizeDigits(v){return String(v||'').replace(/\D/g,'').slice(-10)}
-function matchPayment(order,payments,used){
-  const amount=Math.round(Number(order?.totals?.total||0));
-  const email=String(order?.customer?.email||'').trim().toLowerCase();
-  const phone=normalizeDigits(order?.customer?.phone);
-  const created=Math.floor(new Date(order?.createdAt||0).getTime()/1000);
-  let best=null,bestScore=-1;
-  for(const p of payments){
-    if(used.has(p.id)||p.status!=='captured')continue;
-    if(Math.round(Number(p.amount||0))!==amount)continue;
-    const pe=String(p.email||'').trim().toLowerCase(), pp=normalizeDigits(p.contact);
-    let score=0;
-    if(email&&pe&&email===pe)score+=4;
-    if(phone&&pp&&phone===pp)score+=4;
-    const dt=Math.abs(Number(p.createdAt||0)-created);
-    if(dt<=7200)score+=3; else if(dt<=86400)score+=1; else continue;
-    if(score>bestScore){best=p;bestScore=score}
-  }
-  return bestScore>=5?best:null;
-}
-async function reconcilePayments(orderList){
-  if(!ADMIN_API_BASE)return orderList;
-  try{
-    const payments=await fetchRecentRazorpayPayments(),used=new Set(),fb=await waitFirebase();
-    for(const o of orderList){
-      if(o.paymentStatus==='paid'&&o.razorpayPaymentId){used.add(o.razorpayPaymentId);continue}
-      const payment=matchPayment(o,payments,used);
-      if(payment){
-        used.add(payment.id);
-        o.paymentStatus='paid';o.razorpayPaymentId=payment.id;o.paidAt=payment.createdAt?new Date(payment.createdAt*1000).toISOString():new Date().toISOString();
-        await fb.updateCheckoutOrder(o.id,{paymentStatus:'paid',razorpayPaymentId:payment.id,paidAt:o.paidAt});
-      }
-    }
-  }catch(error){console.info('Razorpay reconciliation unavailable:',error)}
-  return orderList;
-}
 async function loadOrders(){
   try{
-    const fb=await waitFirebase();
-    orders=await fb.loadCheckoutOrders();
-    orders=await reconcilePayments(orders);
-  }catch(error){console.info('InkWaves orders unavailable:',error);orders=[]}
+    const result=await api('/api/admin/orders');
+    orders=Array.isArray(result)?result:(Array.isArray(result?.orders)?result.orders:[]);
+  }catch(error){
+    console.info('InkWaves orders backend unavailable:', error);
+    orders=[];
+  }
   renderOrders();
 }
-function renderOrders(){
-  if(!$('#orderList'))return;
-  const orderList=Array.isArray(orders)?orders:[];
-  const paid=orderList.filter(o=>o.paymentStatus==='paid'),pending=orderList.filter(o=>o.paymentStatus!=='paid'),revenue=paid.reduce((s,o)=>s+Number(o.totals?.total||0),0);
-  $('#orderStats').innerHTML=`<article><span>TOTAL ORDERS</span><strong>${orderList.length}</strong></article><article><span>PAID</span><strong>${paid.length}</strong></article><article><span>PENDING</span><strong>${pending.length}</strong></article><article><span>PAID VALUE</span><strong>${money(revenue)}</strong></article>`;
-  $('#orderList').innerHTML=orderList.length?orderList.map(o=>{
-    const hasPhotos=(o.items||[]).some(i=>i.customType==='polaroid'||Number(i.photoCount)>0);
-    const items=(o.items||[]).map(i=>`<li>${esc(i.name)} × ${i.quantity||1} <small>${esc(i.options?.size||'')} · ${esc(i.options?.finish||'')}</small>${Number(i.photoCount)>0?` <b>${i.photoCount} photos</b>`:''}</li>`).join('');
-    return`<article class="order-card"><div class="order-head"><div><span class="order-id">${esc(o.id)}</span><strong>${esc(o.customer?.name||'Customer')}</strong><small>${new Date(o.createdAt).toLocaleString('en-IN')}</small></div><div class="order-payment ${o.paymentStatus==='paid'?'paid':'pending'}">${esc(o.paymentStatus||'pending')}</div></div><div class="order-grid"><div><label>Customer</label><p>${esc(o.customer?.email||'')}<br>${esc(o.customer?.phone||'')}<br>${esc(o.customer?.address||'')}, ${esc(o.customer?.city||'')}, ${esc(o.customer?.state||'')} - ${esc(o.customer?.pincode||'')}</p></div><div><label>Payment</label><p><strong>${money(o.totals?.total)}</strong><br>${o.paymentStatus==='paid'?`Razorpay: ${esc(o.razorpayPaymentId||'Captured')}`:'Awaiting captured Razorpay payment'}<br>${esc(o.paymentSource||'Razorpay')}</p></div><div class="order-items"><label>Items</label><ul>${items}</ul></div></div><div class="order-actions"><select data-order-status="${esc(o.id)}">${['New','Processing','Packed','Shipped','Delivered','Cancelled'].map(s=>`<option ${s===(o.fulfillmentStatus||'New')?'selected':''}>${s}</option>`).join('')}</select>${hasPhotos?`<button class="mini-btn" data-order-photos="${esc(o.id)}">View polaroid photos</button>`:''}<span>${o.paymentStatus==='paid'?'Payment captured · customer confirmation handled by Razorpay receipt.':'Refresh Orders after the customer pays to reconcile Razorpay.'}</span></div><div class="order-photo-view" id="photos-${esc(o.id)}" hidden></div></article>`
-  }).join(''):'<div class="orders-empty">No orders yet. Checkout orders saved to Firebase will appear here.</div>';
-}
+function renderOrders(){if(!$('#orderList'))return;const orderList=Array.isArray(orders)?orders:[];const paid=orderList.filter(o=>o.paymentStatus==='paid'),pending=orderList.filter(o=>o.paymentStatus==='pending'),revenue=paid.reduce((s,o)=>s+Number(o.totals?.total||0),0);$('#orderStats').innerHTML=`<article><span>TOTAL ORDERS</span><strong>${orderList.length}</strong></article><article><span>PAID</span><strong>${paid.length}</strong></article><article><span>PENDING</span><strong>${pending.length}</strong></article><article><span>PAID VALUE</span><strong>${money(revenue)}</strong></article>`;$('#orderList').innerHTML=orderList.length?orderList.map(o=>{const items=(o.items||[]).map(i=>`<li>${esc(i.name)} × ${i.quantity} <small>${esc(i.options?.size||'')} · ${esc(i.options?.finish||'')}</small></li>`).join('');const notification=`Email: ${esc(o.notifications?.customerEmail||'pending')} · Admin: ${esc(o.notifications?.adminEmail||'pending')} · WhatsApp: ${esc(o.notifications?.whatsapp||'pending')}`;return`<article class="order-card"><div class="order-head"><div><span class="order-id">${esc(o.id)}</span><strong>${esc(o.customer?.name||'Customer')}</strong><small>${new Date(o.createdAt).toLocaleString('en-IN')}</small></div><div class="order-payment ${o.paymentStatus==='paid'?'paid':o.paymentStatus==='failed'?'failed':'pending'}">${esc(o.paymentStatus||'pending')}</div></div><div class="order-grid"><div><label>Customer</label><p>${esc(o.customer?.email||'')}<br>+91 ${esc(o.customer?.phone||'')}<br>${esc(o.customer?.address||'')}, ${esc(o.customer?.city||'')}, ${esc(o.customer?.state||'')} - ${esc(o.customer?.pincode||'')}</p></div><div><label>Payment</label><p><strong>${money(o.totals?.total)}</strong><br>Razorpay: ${esc(o.razorpayPaymentId||'Awaiting payment')}<br>Order: ${esc(o.razorpayOrderId||'')}</p></div><div class="order-items"><label>Items</label><ul>${items}</ul></div></div><div class="order-actions"><select data-order-status="${esc(o.id)}">${['New','Processing','Packed','Shipped','Delivered','Cancelled'].map(s=>`<option ${s===(o.fulfillmentStatus||'New')?'selected':''}>${s}</option>`).join('')}</select>${o.paymentStatus==='paid'?`<a class="mini-btn invoice-btn" href="api/admin/orders/${encodeURIComponent(o.id)}/invoice" data-invoice-id="${esc(o.id)}">Download invoice</a><button class="mini-btn" data-resend-order="${esc(o.id)}">Resend confirmation</button>`:''}<span>${notification}</span></div></article>`}).join(''):'<div class="orders-empty">No orders yet. Orders will appear here as soon as checkout creates them.</div>'}
 function renderContent(){$('#contentFields').innerHTML=contentDefs.map(([key,label,type])=>`<div class="field ${type==='textarea'?'wide':''}"><label>${label}</label>${type==='textarea'?`<textarea data-setting="${key}">${esc(data.settings[key])}</textarea>`:`<input data-setting="${key}" type="${type}" value="${esc(data.settings[key])}">`}</div>`).join('')}
 function uploadControl(value,index,type){return`<div><label>Image path</label><div class="upload-row"><input data-${type}-image="${index}" value="${esc(value)}"><button type="button" data-upload-for="${type}" data-index="${index}">Upload</button></div><div class="image-preview">${value?`<img src="${esc(value)}" alt="">`:''}</div></div>`}
 function renderHero(){$('#heroEditor').innerHTML=data.heroSlides.map((s,i)=>`<div class="editor-card"><div class="drag-num">${i+1}</div><div><label>Label</label><input data-slide-field="label" data-index="${i}" value="${esc(s.label)}"></div><div><label>Caption</label><input data-slide-field="caption" data-index="${i}" value="${esc(s.caption)}"></div>${uploadControl(s.image,i,'slide')}<div><label>Accent</label><input type="color" data-slide-field="accent" data-index="${i}" value="${esc(s.accent||'#d9ff00')}"></div><div class="card-actions"><button data-move-slide="up" data-index="${i}">↑</button><button data-move-slide="down" data-index="${i}">↓</button><button class="remove-btn" data-remove-slide="${i}">×</button></div></div>`).join('')}
@@ -241,7 +188,7 @@ async function uploadImage(type,index){const input=document.createElement('input
 function move(arr,i,dir){const j=dir==='up'?i-1:i+1;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]]}
 $('#newProductCategory')?.addEventListener('change',e=>{if($('#newCategoryWrap'))$('#newCategoryWrap').hidden=e.target.value!=='__new__'});$('#newProductImage')?.addEventListener('change',e=>{const f=e.target.files[0],preview=$('#newProductPreview');if(!preview)return;if(!f){preview.innerHTML='<span>Upload the original poster artwork only — no room, frame or mockup background</span>';return}const url=URL.createObjectURL(f);preview.innerHTML=`<img src="${url}" alt="Product preview">`;setTimeout(()=>URL.revokeObjectURL(url),60000)});$('#publishProduct')?.addEventListener('click',async()=>{const b=$('#publishProduct'),msg=$('#productUploadStatus');try{b.disabled=true;b.textContent='Publishing…';if(msg)msg.textContent='Uploading image and saving product…';await publishNewProduct();if(msg)msg.textContent='Published successfully.'}catch(e){if(msg)msg.textContent=e.message;status(e.message)}finally{b.disabled=false;b.textContent='Publish product'}});
 $('#adminProductSearch')?.addEventListener('input',e=>{collect();productAdminQuery=e.target.value;productAdminLimit=40;renderProducts()});$('#adminLoadMore')?.addEventListener('click',()=>{collect();productAdminLimit+=40;renderProducts()});
-document.addEventListener('change',async e=>{const sel=e.target.closest('[data-order-status]');if(!sel)return;try{const fb=await waitFirebase();await fb.updateCheckoutOrder(sel.dataset.orderStatus,{fulfillmentStatus:sel.value});status('Order status updated');await loadOrders()}catch(err){status(err.message)}});
+document.addEventListener('change',async e=>{const sel=e.target.closest('[data-order-status]');if(!sel)return;try{await api(`/api/admin/orders/${encodeURIComponent(sel.dataset.orderStatus)}/status`,{method:'PUT',body:JSON.stringify({status:sel.value})});status('Order status updated');await loadOrders()}catch(err){status(err.message)}});
 $('#logoutBtn').addEventListener('click',async()=>{try{const fb=await waitFirebase();await fb.signOutAdmin()}finally{location.reload()}});
 
 document.getElementById('importLegacyCatalog')?.addEventListener('click',async()=>{
@@ -257,7 +204,7 @@ document.getElementById('importLegacyCatalog')?.addEventListener('click',async()
     await fb.saveWholeStore(legacy);data=await fb.loadMergedData(window.INKWAVE_DEFAULT_DATA);renderAll();localStorage.removeItem('inkwaves-admin-local-v54-empty');status('Old browser catalog imported to Firebase successfully.');
   }catch(err){status(err.message||'Could not import the old browser catalog.')}
 });
-document.addEventListener('click',async e=>{const photosBtn=e.target.closest('[data-order-photos]');if(photosBtn){try{const fb=await waitFirebase(),box=$(`#photos-${CSS.escape(photosBtn.dataset.orderPhotos)}`);if(!box)return;box.hidden=false;box.innerHTML='<p>Loading photos…</p>';const photos=await fb.loadOrderPhotos(photosBtn.dataset.orderPhotos);box.innerHTML=photos.length?`<div class="admin-order-photo-grid">${photos.map((p,i)=>`<a href="${p.data}" download="${esc(photosBtn.dataset.orderPhotos)}-${i+1}.webp"><img src="${p.data}" alt="Polaroid photo ${i+1}"><span>Download ${i+1}</span></a>`).join('')}</div>`:'<p>No stored photos found.</p>';status('Polaroid photos loaded')}catch(err){status(err.message)}return}if(e.target.id==='refreshOrders'){try{await loadOrders();status(ADMIN_API_BASE?'Orders refreshed and Razorpay reconciled':'Orders refreshed · connect the private Razorpay Sync Worker to auto-mark paid orders')}catch(err){status(err.message)}return}const tab=e.target.closest('[data-tab]');if(tab){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b===tab));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$(`#panel-${tab.dataset.tab}`).classList.add('active');return}if(e.target.id==='saveAll'){saveAll().catch(err=>status(err.message));return}if(e.target.id==='addSlide'){collect();data.heroSlides.push({image:'assets/pack-afterhours.svg',label:'NEW SLIDE',caption:'Edit this caption',accent:'#d9ff00'});renderHero();return}if(e.target.id==='addCategory'){collect();data.categories.push({id:`category-${data.categories.length+1}`,name:'New Category',subtitle:'Edit category description',image:'assets/pack-geometry.svg',accent:'#eeeeee'});renderCategories();renderProducts();return}if(e.target.id==='addReview'){collect();data.reviews.push({name:'Customer name',location:'City',rating:5,text:'Add a genuine customer review.',product:''});renderReviewsAdmin();return}const u=e.target.closest('[data-upload-for]');if(u){uploadImage(u.dataset.uploadFor,+u.dataset.index);return}const rs=e.target.closest('[data-remove-slide]');if(rs){collect();data.heroSlides.splice(+rs.dataset.removeSlide,1);renderHero();return}const rc=e.target.closest('[data-remove-cat]');if(rc){collect();data.categories.splice(+rc.dataset.removeCat,1);renderCategories();renderProducts();return}const rp=e.target.closest('[data-remove-product]');if(rp){collect();data.products.splice(+rp.dataset.removeProduct,1);renderProducts();return}const rr=e.target.closest('[data-remove-review]');if(rr){collect();data.reviews.splice(+rr.dataset.removeReview,1);renderReviewsAdmin();return}const ms=e.target.closest('[data-move-slide]');if(ms){collect();move(data.heroSlides,+ms.dataset.index,ms.dataset.moveSlide);renderHero();return}const mc=e.target.closest('[data-move-cat]');if(mc){collect();move(data.categories,+mc.dataset.index,mc.dataset.moveCat);renderCategories();return}const mr=e.target.closest('[data-move-review]');if(mr){collect();move(data.reviews,+mr.dataset.index,mr.dataset.moveReview);renderReviewsAdmin();return}});
+document.addEventListener('click',async e=>{const invoice=e.target.closest('[data-invoice-id]');if(invoice){e.preventDefault();try{const r=await fetch(adminApiUrl(invoice.getAttribute('href')),{headers:{Authorization:`Bearer ${token}`}});if(!r.ok)throw new Error('Could not download invoice');const blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`InkWaves-${invoice.dataset.invoiceId}.pdf`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}catch(err){status(err.message)}return}const resend=e.target.closest('[data-resend-order]');if(resend){try{await api(`/api/admin/orders/${encodeURIComponent(resend.dataset.resendOrder)}/resend`,{method:'POST',body:'{}'});status('Confirmation resend attempted');await loadOrders()}catch(err){status(err.message)}return}if(e.target.id==='refreshOrders'){try{await loadOrders();status('Orders refreshed')}catch(err){status(err.message)}return}const tab=e.target.closest('[data-tab]');if(tab){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b===tab));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$(`#panel-${tab.dataset.tab}`).classList.add('active');return}if(e.target.id==='saveAll'){saveAll().catch(err=>status(err.message));return}if(e.target.id==='addSlide'){collect();data.heroSlides.push({image:'assets/pack-afterhours.svg',label:'NEW SLIDE',caption:'Edit this caption',accent:'#d9ff00'});renderHero();return}if(e.target.id==='addCategory'){collect();data.categories.push({id:`category-${data.categories.length+1}`,name:'New Category',subtitle:'Edit category description',image:'assets/pack-geometry.svg',accent:'#eeeeee'});renderCategories();renderProducts();return}if(e.target.id==='addReview'){collect();data.reviews.push({name:'Customer name',location:'City',rating:5,text:'Add a genuine customer review.',product:''});renderReviewsAdmin();return}const u=e.target.closest('[data-upload-for]');if(u){uploadImage(u.dataset.uploadFor,+u.dataset.index);return}const rs=e.target.closest('[data-remove-slide]');if(rs){collect();data.heroSlides.splice(+rs.dataset.removeSlide,1);renderHero();return}const rc=e.target.closest('[data-remove-cat]');if(rc){collect();data.categories.splice(+rc.dataset.removeCat,1);renderCategories();renderProducts();return}const rp=e.target.closest('[data-remove-product]');if(rp){collect();data.products.splice(+rp.dataset.removeProduct,1);renderProducts();return}const rr=e.target.closest('[data-remove-review]');if(rr){collect();data.reviews.splice(+rr.dataset.removeReview,1);renderReviewsAdmin();return}const ms=e.target.closest('[data-move-slide]');if(ms){collect();move(data.heroSlides,+ms.dataset.index,ms.dataset.moveSlide);renderHero();return}const mc=e.target.closest('[data-move-cat]');if(mc){collect();move(data.categories,+mc.dataset.index,mc.dataset.moveCat);renderCategories();return}const mr=e.target.closest('[data-move-review]');if(mr){collect();move(data.reviews,+mr.dataset.index,mr.dataset.moveReview);renderReviewsAdmin();return}});
 
 
 </script>

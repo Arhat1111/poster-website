@@ -121,12 +121,41 @@ async function startRazorpayPaymentPage(customer,totals){
     photoCount:Number(i.photoCount)||0,
     photos:Array.isArray(i.photos)?i.photos:[]
   }));
-  const created=await window.INKWAVES_FIREBASE.createCheckoutOrder({
+  const orderInput={
     customer,
     items:orderItems,
     totals:{...totals},
     coupon:state.coupon||''
-  });
+  };
+  let created;
+  try{
+    created=await window.INKWAVES_FIREBASE.createCheckoutOrder(orderInput);
+  }catch(err){
+    const message=String(err?.message||'');
+    const code=String(err?.code||'');
+    const permissionDenied=code.includes('permission-denied')||message.toLowerCase().includes('missing or insufficient permissions');
+    if(!permissionDenied)throw err;
+    const id=window.INKWAVES_FIREBASE.checkoutOrderId();
+    created={id,unsynced:true};
+    const recovery={
+      id,
+      createdAt:new Date().toISOString(),
+      customer,
+      items:orderItems.map(({photos,...item})=>item),
+      totals:{...totals},
+      coupon:state.coupon||'',
+      paymentStatus:'pending',
+      fulfillmentStatus:'New',
+      syncError:'Firebase order-create permission was not published yet.'
+    };
+    try{
+      const existing=JSON.parse(localStorage.getItem('inkwaves-unsynced-orders')||'[]');
+      existing.push(recovery);
+      localStorage.setItem('inkwaves-unsynced-orders',JSON.stringify(existing.slice(-20)));
+    }catch{}
+    console.warn('InkWaves: Firebase order save was denied. Continuing to Razorpay using recovery order',id,err);
+    showToast(`Order ${id} prepared · opening Razorpay. Firebase sync permissions need publishing.`,2600);
+  }
   url.searchParams.set('amount',String(Math.round(totals.total)));
   if(customer?.name)url.searchParams.set('full_name',customer.name);
   if(customer?.email)url.searchParams.set('email',customer.email);
@@ -137,12 +166,12 @@ async function startRazorpayPaymentPage(customer,totals){
   }
   const summary=state.cart.map(i=>`${i.name||'InkWaves item'} x${Number(i.quantity)||1}`).join(', ').slice(0,150);
   url.searchParams.set('description',`${created.id} · ${summary||'InkWaves order'}`);
-  const pendingSummary={id:created.id,createdAt:Date.now(),amount:totals.total,customer,cart:orderItems.map(({photos,...i})=>i)};
+  const pendingSummary={id:created.id,createdAt:Date.now(),amount:totals.total,customer,cart:orderItems.map(({photos,...i})=>i),unsynced:Boolean(created.unsynced)};
   sessionStorage.setItem('inkwaves-pending-order',JSON.stringify(pendingSummary));
   localStorage.setItem('inkwaves-last-order-id',created.id);
   localStorage.setItem('inkwaves-last-order-summary',JSON.stringify(pendingSummary));
-  showToast(`Order ${created.id} saved · opening Razorpay…`,2200);
-  setTimeout(()=>{window.location.assign(url.toString())},180);
+  if(!created.unsynced)showToast(`Order ${created.id} saved · opening Razorpay…`,2200);
+  setTimeout(()=>{window.location.assign(url.toString())},220);
   return true;
 }
 
