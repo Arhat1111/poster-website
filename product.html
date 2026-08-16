@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="InkWaves poster product page" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>InkWaves — Poster</title>
+  <link rel="icon" type="image/webp" href="assets/inkwaves-icon.webp" />
+  <link rel="stylesheet" href="styles.css?v=80" />
+  <link rel="stylesheet" href="product-page.css?v=80" />
+</head>
+<body class="product-page-body">
+<header class="product-site-header">
+    <a class="product-back" href="products.html">← PRODUCTS</a>
+    <a class="brand brand-image" href="index.html" aria-label="InkWaves home"><img src="assets/inkwaves-wordmark.webp" alt="InkWaves — Posters That Inspire" /></a>
+    <a class="product-bag-link" href="index.html?cart=1" aria-label="Open shopping bag">BAG <span id="productCartCount">0</span></a>
+  </header>
+
+  <main class="product-detail-main">
+    <div class="product-breadcrumb"><a href="index.html">Home</a><span>/</span><a href="products.html">Posters</a><span>/</span><span id="crumbName">Product</span></div>
+
+    <section class="product-detail" id="productDetail">
+      <div class="product-detail-media">
+        <div class="product-mockup-slider" id="productMockupSlider">
+          <button class="mockup-arrow mockup-prev" type="button" id="productMockupPrev" aria-label="Previous mockup">←</button>
+          <div class="product-mockup-track" id="productMockupTrack"></div>
+          <button class="mockup-arrow mockup-next" type="button" id="productMockupNext" aria-label="Next mockup">→</button>
+          <div class="mockup-dots" id="productMockupDots" aria-label="Product image views"></div>
+          <span class="mockup-counter" id="productMockupCounter">01 / 02</span>
+        </div>
+        <div class="product-quality-row"><span>300 GSM</span><span>MATTE LAMINATED</span><span>PRINTED IN INDIA</span></div>
+      </div>
+
+      <div class="product-detail-info">
+        <p class="overline" id="productCategory">INKWAVES</p>
+        <div class="product-title-row"><h1 id="productName">Loading poster…</h1><span class="detail-badge" id="productBadge" hidden></span></div>
+        <p class="product-detail-description" id="productDescription"></p>
+        <div class="detail-price"><span>FROM</span><strong id="fromPrice">₹19</strong></div>
+
+        <div class="detail-option-block">
+          <div class="detail-option-title"><strong>SELECT SIZE</strong><span id="sizeDetail"></span></div>
+          <div class="detail-size-grid" id="detailSizeOptions"></div>
+          <div class="detail-offer" id="detailOffer"></div>
+        </div>
+
+        <div class="detail-option-block">
+          <div class="detail-option-title"><strong>FINISH</strong></div>
+          <div class="detail-options" id="detailFinishOptions"></div>
+        </div>
+
+        <div class="detail-buy-box">
+          <div><small>PER POSTER</small><strong id="detailPrice">₹0</strong></div>
+          <button class="button button-dark" id="detailAddToBag">ADD TO BAG</button>
+        </div>
+        <p class="detail-cart-note" id="detailCartNote"></p>
+
+        <div class="detail-info-list">
+          <details open><summary>PRINT QUALITY <span>+</span></summary><p>Printed as an InkWaves 300 GSM quality poster with a clean matte laminated finish as the standard option.</p></details>
+          <details><summary>SIZE OFFERS <span>+</span></summary><p>Bundle offers are calculated automatically across posters of the same size in your bag, so you can mix different designs.</p></details>
+          <details><summary>DELIVERY & PAYMENT <span>+</span></summary><p>Shipping is available across India. Razorpay handles supported UPI, cards and enabled payment methods when the store server is running.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="product-offers-panel section-pad">
+      <div class="title-row"><div><p class="overline">MORE POSTERS. BETTER VALUE.</p><h2>SIZE OFFERS</h2></div><p class="section-description">Mix different designs in one size. The offer is calculated automatically in your bag.</p></div>
+      <div class="offer-grid" id="productOfferGrid"></div>
+    </section>
+
+    <section class="related-products section-pad">
+      <div class="title-row"><div><p class="overline">KEEP BROWSING</p><h2>YOU MAY ALSO LIKE</h2></div><a class="related-shop-link" href="products.html">SHOP ALL →</a></div>
+      <div class="product-grid" id="relatedProducts"></div>
+    </section>
+  </main>
+
+  <footer><div class="footer-top"><div><div class="footer-brand footer-brand-image"><img src="assets/inkwaves-wordmark.webp" alt="InkWaves" /></div><p>POSTERS FOR WALLS WITH PERSONALITY.</p></div><div class="footer-columns"><div><strong>SHOP</strong><a href="products.html">Products</a><a href="index.html#categories">Categories</a><a href="index.html#offers">Offers</a><a href="index.html#custom">Custom build</a></div><div><strong>INFO</strong><a href="about.html">About</a><a href="index.html#reviews">Reviews</a><a href="index.html#faq">FAQs</a></div><div><strong>CONTACT</strong><a id="footerEmail" href="mailto:hello@inkwave.in">Email ↗</a><a id="footerInstagram" href="https://instagram.com" target="_blank" rel="noreferrer">Instagram ↗</a></div></div></div><div class="footer-bottom"><span>© 2026 INKWAVES INDIA</span><span>BUILT AT NITK SURATHKAL.</span></div></footer>
+
+  <div class="product-toast" id="productToast" role="status"></div>
+  <script src="default-data.js"></script>
+  <script type="module" src="firebase-store.js?v=80"></script>
+  <script src="payment-config.js?v=82"></script>
+  <script src="product.js?v=80"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Shop all InkWave posters by category, available in A6, A5, A4 and A3." />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Products — InkWave</title>
+  <link rel="icon" type="image/webp" href="assets/inkwaves-icon.webp" />
+  <link rel="stylesheet" href="styles.css?v=80" />
+  <link rel="stylesheet" href="product-page.css?v=80" />
+</head>
+<body class="products-page-body">
+<header class="product-site-header">
+    <a class="product-back" href="index.html">← HOME</a>
+    <a class="brand brand-image" href="index.html" aria-label="InkWave home"><img src="assets/inkwaves-wordmark.webp" alt="InkWaves — Posters That Inspire" /></a>
+    <a class="product-bag-link" href="index.html?cart=1">BAG <span id="productsCartCount">0</span></a>
+  </header>
+
+  <main>
+    <section class="products-hero">
+      <div class="products-hero-grid">
+        <div>
+          <p class="overline">ALL INKWAVE PRINTS</p>
+          <h1>PRODUCTS.</h1>
+          <p>Browse every InkWave poster in one place. Filter by your mood, open a design for the full product page, then choose A6, A5, A4 or A3 before adding it to your bag.</p>
+        </div>
+        <div class="products-size-board" id="productsSizeBoard"></div>
+      </div>
+    </section>
+
+    <section class="products-catalog">
+      <div class="products-toolbar products-toolbar-minimal">
+        <label class="products-search products-search-minimal">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <input id="productsSearch" type="search" placeholder="Search posters" aria-label="Search posters" />
+        </label>
+        <label class="products-category-select-wrap">
+          <span>CATEGORY</span>
+          <select id="productsCategorySelect" aria-label="Filter posters by category"></select>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"></path></svg>
+        </label>
+      </div>
+      <p class="products-count" id="productsCount"></p>
+      <div class="product-grid products-page-grid" id="productsGrid"></div>
+      <div class="products-load-more-wrap"><button class="button button-dark" id="productsLoadMore" type="button">LOAD MORE POSTERS →</button></div>
+      <div class="empty-state" id="productsEmpty" hidden>No posters have been published yet.</div>
+    </section>
+  </main>
+
+  <footer><div class="footer-top"><div><div class="footer-brand footer-brand-image"><img src="assets/inkwaves-wordmark.webp" alt="InkWaves" /></div><p>POSTERS FOR WALLS WITH PERSONALITY.</p></div><div class="footer-columns"><div><strong>SHOP</strong><a href="products.html">Products</a><a href="index.html#categories">Categories</a><a href="index.html#offers">Offers</a><a href="index.html#custom">Custom build</a></div><div><strong>INFO</strong><a href="about.html">About</a><a href="index.html#reviews">Reviews</a><a href="index.html#faq">FAQs</a></div><div><strong>CONTACT</strong><a id="footerEmail" href="mailto:hello@inkwave.in">Email ↗</a><a id="footerInstagram" href="https://instagram.com" target="_blank" rel="noreferrer">Instagram ↗</a></div></div></div><div class="footer-bottom"><span>© 2026 INKWAVE INDIA</span><span>BUILT AT NITK SURATHKAL.</span></div></footer>
+
+  <script src="default-data.js"></script>
+  <script type="module" src="firebase-store.js?v=80"></script>
+  <script src="payment-config.js?v=82"></script>
+  <script src="products.js?v=80"></script>
+</body>
+</html>
