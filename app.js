@@ -114,7 +114,11 @@ function startRazorpayPaymentPage(customer,totals){
   url.searchParams.set('amount',String(Math.round(totals.total)));
   if(customer?.name)url.searchParams.set('full_name',customer.name);
   if(customer?.email)url.searchParams.set('email',customer.email);
-  if(customer?.phone)url.searchParams.set('phone',customer.phone);
+  if(customer?.phone){
+    const digits=String(customer.phone).replace(/\D/g,'');
+    const indianPhone=digits.length>10&&digits.startsWith('91')?digits.slice(-10):digits;
+    url.searchParams.set('phone',indianPhone);
+  }
   const summary=state.cart.map(i=>`${i.name||'InkWaves item'} x${Number(i.quantity)||1}`).join(', ').slice(0,180);
   url.searchParams.set('description',summary||'InkWaves order');
   sessionStorage.setItem('inkwaves-pending-order',JSON.stringify({createdAt:Date.now(),amount:totals.total,customer,cart:state.cart.map(i=>({id:i.id,name:i.name,quantity:i.quantity,options:i.options,customType:i.customType,photoCount:i.photoCount}))}));
