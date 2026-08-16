@@ -268,3 +268,5 @@ footer{background:#111;color:#fff;padding:54px clamp(18px,5vw,72px) 20px}.footer
 .sample-polaroid-copy strong{display:block;font-size:11px;letter-spacing:.08em}
 .sample-polaroid-copy span{display:block;margin-top:7px;font-size:9px;color:#777;line-height:1.5}
 @media(max-width:460px){.polaroid-retro-sample{width:100%!important}.polaroid-preview-empty.polaroid-sample-stage{padding:10px!important}}
+
+.payment-waiting{position:fixed;inset:0;z-index:9999;display:none;place-items:center;background:rgba(0,0,0,.58);padding:18px}.payment-waiting.show{display:grid}.payment-waiting>div{width:min(560px,100%);background:#fff;border:1px solid #111;padding:clamp(24px,5vw,46px)}.payment-waiting span{font-size:9px;letter-spacing:.12em}.payment-waiting strong{display:block;font-family:var(--display,Arial);font-size:clamp(34px,6vw,54px);line-height:.95;font-weight:500;margin:12px 0 16px}.payment-waiting p{font-size:12px;line-height:1.7;color:#555}.payment-waiting button{border:1px solid #111;background:#111;color:#fff;padding:13px 17px;font-size:10px;font-weight:600;margin-top:10px}

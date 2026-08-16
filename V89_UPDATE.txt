@@ -1,0 +1,12 @@
+INKWAVES V8.9 UPDATE
+
+1. Upload all files from this folder to the GitHub website repository, replacing V8.8.
+2. In Cloudflare, replace the existing inkwaves-payments Worker code with the V8.9 worker.js provided separately and Deploy.
+3. Keep the existing Cloudflare secret RAZORPAY_KEY_SECRET. Do not put the secret in GitHub.
+4. Hard refresh inkwave.co.in and admin.html.
+
+V8.9 fixes:
+- Custom Polaroid uploaded photos saved as Firebase order attachments and view/downloadable in Admin.
+- Custom Poster uploaded artwork saved as a Firebase order attachment and view/downloadable in Admin.
+- Every normal ordered poster displays its poster image and name in Admin.
+- Razorpay opens in a separate payment window while InkWaves polls the secure Worker. As soon as Razorpay reports the Payment Link paid, InkWaves stops waiting, closes the payment window when possible, and opens the order confirmation page.

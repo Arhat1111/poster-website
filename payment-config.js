@@ -1,4 +1,4 @@
-// InkWaves V8.8 secure payment configuration.
+// InkWaves V8.9 secure payment configuration.
 // Public website points only to the private Cloudflare Worker.
 window.INKWAVES_PAYMENT_API_BASE = 'https://inkwaves-payments.imagephotoshoot3.workers.dev';
 window.INKWAVES_RAZORPAY_PAYMENT_PAGE_URL = '';

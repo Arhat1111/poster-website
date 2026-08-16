@@ -130,12 +130,16 @@ async function createCheckoutOrder(orderInput) {
     if (photos.length) {
       item.photoCount = photos.length;
       item.photoCollection = true;
+      item.attachmentType = item.customType === 'poster' ? 'custom-poster' : (item.customType === 'polaroid' ? 'custom-polaroid' : 'order-image');
       photos.forEach((data,index) => {
         const photoId = String(photoSeq++).padStart(3,'0');
+        const label = item.customType === 'poster' ? 'Custom poster artwork' : `Polaroid photo ${index+1}`;
         photoJobs.push(() => setDoc(doc(db,'orders',id,'photos',photoId), clean({
           index,
           itemId: item.id || 'custom-polaroid',
-          name: `Photo ${index+1}`,
+          itemName: item.name || 'Custom item',
+          kind: item.attachmentType,
+          name: label,
           data,
           createdAt
         })));
