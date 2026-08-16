@@ -105,12 +105,28 @@ function addToCart(){const item={key:`${state.activeProduct.id}-${Date.now()}-${
 function selectionPriceForItem(item){if(item.customType==='polaroid'||item.id==='custom-polaroid')return polaroidPrice(item.photoCount);const c=siteData.commerce,p=item.id==='custom'?{sizes:{}}:products.find(x=>x.id===item.id);return(p?productPrice(p,item.options?.size):Number(c.sizes[item.options?.size]?.price||0))+(c.finishes[item.options?.finish]?.price||0)}
 function renderCart(){if(!siteData)return;els.cartCount.textContent=state.cart.reduce((s,i)=>s+i.quantity,0);els.cartItems.innerHTML=state.cart.map(item=>{const pol=item.customType==='polaroid'||item.id==='custom-polaroid';return`<article class="cart-item ${pol?'polaroid-cart-item':''}"><img src="${escapeHTML(item.image||'assets/poster-custom.svg')}" alt=""><div><h4>${escapeHTML(item.name)}</h4>${pol?`<p class="cart-polaroid-note">${item.photoCount} uploaded photo${item.photoCount===1?'':'s'} · custom polaroid print</p>${item.photoCount===20?'<span class="polaroid-bundle-badge">20 FOR ₹100 BUNDLE</span>':''}`:`<p>${escapeHTML(item.options?.size||'A4')} · ${escapeHTML(item.options?.finish||'Matte Laminated')}</p><div class="cart-qty"><button data-qty="minus" data-key="${item.key}">−</button><span>${item.quantity}</span><button data-qty="plus" data-key="${item.key}">+</button></div>`}</div><div><strong>${formatINR(selectionPriceForItem(item)*item.quantity)}</strong><button class="cart-remove" data-remove="${item.key}">Remove</button></div></article>`}).join('');wireImageFallbacks(els.cartItems);const t=calculateCart();els.cartSubtotal.textContent=formatINR(t.rawSubtotal);els.offerSavings.textContent=`− ${formatINR(t.offerSavings)}`;els.cartTotal.textContent=formatINR(t.total);els.checkoutAmount.textContent=formatINR(t.total);els.cartEmpty.hidden=state.cart.length>0;els.cartFooter.hidden=state.cart.length===0;els.couponInput.value=state.coupon;els.couponMessage.textContent=t.coupon?`${siteData.settings.couponCode} applied · saved ${formatINR(t.coupon)}`:'';els.offerMessage.textContent=t.offerSavings?`Size offers applied · you saved ${formatINR(t.offerSavings)}`:(state.cart.some(i=>i.customType==='polaroid')?'Your custom polaroid set is ready for checkout.':'Add more posters in the same size to unlock bundle offers.')}
 function openLayer(el){el.hidden=false;els.overlay.classList.add('active');document.body.classList.add('locked');requestAnimationFrame(()=>el.classList.add('visible'))}function closeLayer(el){el.classList.remove('visible');setTimeout(()=>{el.hidden=true},200);els.overlay.classList.remove('active');document.body.classList.remove('locked')}function openCart(){els.cartDrawer.classList.add('open');els.cartDrawer.setAttribute('aria-hidden','false');els.overlay.classList.add('active');document.body.classList.add('locked')}function closeCart(){els.cartDrawer.classList.remove('open');els.cartDrawer.setAttribute('aria-hidden','true');els.overlay.classList.remove('active');document.body.classList.remove('locked')}function closeMobileMenu(){$('#mobileMenu').classList.remove('open');$('#menuButton').setAttribute('aria-expanded','false')}function showToast(msg,d=2800){els.toast.textContent=msg;els.toast.classList.add('show');clearTimeout(showToast.t);showToast.t=setTimeout(()=>els.toast.classList.remove('show'),d)}function applyFilter(filter,scroll=true){state.filter=filter;$$('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter===filter));renderProducts();closeMobileMenu();if(scroll)$('#shop').scrollIntoView({behavior:'smooth',block:'start'})}
-function startRazorpayPaymentPage(customer,totals){
+async function startRazorpayPaymentPage(customer,totals){
   if(!PAYMENT_PAGE_URL)return false;
   let url;
   try{url=new URL(PAYMENT_PAGE_URL)}catch{return false}
-  // Razorpay Payment Pages support pre-population through URL fields.
-  // The configured hosted page remains the source of truth for payment collection.
+  if(!window.INKWAVES_FIREBASE){
+    await new Promise((resolve,reject)=>{const t=setTimeout(()=>reject(new Error('Firebase order sync did not load.')),10000);window.addEventListener('inkwaves-firebase-ready',()=>{clearTimeout(t);resolve()},{once:true})});
+  }
+  const orderItems=state.cart.map(i=>({
+    id:i.id,
+    name:i.name,
+    quantity:Number(i.quantity)||1,
+    options:i.options||{},
+    customType:i.customType||'',
+    photoCount:Number(i.photoCount)||0,
+    photos:Array.isArray(i.photos)?i.photos:[]
+  }));
+  const created=await window.INKWAVES_FIREBASE.createCheckoutOrder({
+    customer,
+    items:orderItems,
+    totals:{...totals},
+    coupon:state.coupon||''
+  });
   url.searchParams.set('amount',String(Math.round(totals.total)));
   if(customer?.name)url.searchParams.set('full_name',customer.name);
   if(customer?.email)url.searchParams.set('email',customer.email);
@@ -119,11 +135,14 @@ function startRazorpayPaymentPage(customer,totals){
     const indianPhone=digits.length>10&&digits.startsWith('91')?digits.slice(-10):digits;
     url.searchParams.set('phone',indianPhone);
   }
-  const summary=state.cart.map(i=>`${i.name||'InkWaves item'} x${Number(i.quantity)||1}`).join(', ').slice(0,180);
-  url.searchParams.set('description',summary||'InkWaves order');
-  sessionStorage.setItem('inkwaves-pending-order',JSON.stringify({createdAt:Date.now(),amount:totals.total,customer,cart:state.cart.map(i=>({id:i.id,name:i.name,quantity:i.quantity,options:i.options,customType:i.customType,photoCount:i.photoCount}))}));
-  showToast('Opening Razorpay secure payment…',1800);
-  setTimeout(()=>{window.location.assign(url.toString())},120);
+  const summary=state.cart.map(i=>`${i.name||'InkWaves item'} x${Number(i.quantity)||1}`).join(', ').slice(0,150);
+  url.searchParams.set('description',`${created.id} · ${summary||'InkWaves order'}`);
+  const pendingSummary={id:created.id,createdAt:Date.now(),amount:totals.total,customer,cart:orderItems.map(({photos,...i})=>i)};
+  sessionStorage.setItem('inkwaves-pending-order',JSON.stringify(pendingSummary));
+  localStorage.setItem('inkwaves-last-order-id',created.id);
+  localStorage.setItem('inkwaves-last-order-summary',JSON.stringify(pendingSummary));
+  showToast(`Order ${created.id} saved · opening Razorpay…`,2200);
+  setTimeout(()=>{window.location.assign(url.toString())},180);
   return true;
 }
 
@@ -132,7 +151,7 @@ async function startRazorpayCheckout(customer){
     const totals=calculateCart();
     if(!state.cart.length)throw new Error('Your bag is empty.');
     if(!PAYMENT_API_BASE){
-      if(startRazorpayPaymentPage(customer,totals))return;
+      if(await startRazorpayPaymentPage(customer,totals))return;
       throw new Error('Razorpay payment page is not configured.');
     }
     if(!window.Razorpay)throw new Error('Razorpay Checkout could not load. Check your internet connection and try again.');

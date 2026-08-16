@@ -1,0 +1,1 @@
+.admin-order-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:12px}.admin-order-photo-grid a{display:block;border:1px solid #d7d7d0;background:#fff;padding:7px;font-size:9px}.admin-order-photo-grid img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;margin-bottom:6px}.order-photo-view{padding:0 16px 16px}

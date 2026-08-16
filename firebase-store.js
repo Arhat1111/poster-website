@@ -109,6 +109,74 @@ async function saveWholeStore(data) {
   return clone(current);
 }
 
+
+function checkoutOrderId() {
+  const d = new Date();
+  const stamp = `${String(d.getFullYear()).slice(-2)}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  const rand = crypto.getRandomValues(new Uint32Array(1))[0].toString(36).slice(0,6).toUpperCase();
+  return `IW-${stamp}-${rand}`;
+}
+
+async function createCheckoutOrder(orderInput) {
+  const id = String(orderInput?.id || checkoutOrderId());
+  const createdAt = orderInput?.createdAt || new Date().toISOString();
+  const items = [];
+  const photoJobs = [];
+  let photoSeq = 0;
+  for (const row of Array.isArray(orderInput?.items) ? orderInput.items : []) {
+    const item = clean({...row});
+    const photos = Array.isArray(item.photos) ? item.photos : [];
+    delete item.photos;
+    if (photos.length) {
+      item.photoCount = photos.length;
+      item.photoCollection = true;
+      photos.forEach((data,index) => {
+        const photoId = String(photoSeq++).padStart(3,'0');
+        photoJobs.push(() => setDoc(doc(db,'orders',id,'photos',photoId), clean({
+          index,
+          itemId: item.id || 'custom-polaroid',
+          name: `Photo ${index+1}`,
+          data,
+          createdAt
+        })));
+      });
+    }
+    items.push(item);
+  }
+  const payload = clean({
+    customer: orderInput?.customer || {},
+    items,
+    totals: orderInput?.totals || {},
+    coupon: orderInput?.coupon || '',
+    paymentStatus: 'pending',
+    fulfillmentStatus: 'New',
+    paymentSource: 'razorpay-payment-page',
+    razorpayPaymentId: '',
+    createdAt,
+    updatedAt: createdAt
+  });
+  await setDoc(doc(db,'orders',id), payload);
+  for (let i=0;i<photoJobs.length;i+=6) await Promise.all(photoJobs.slice(i,i+6).map(fn=>fn()));
+  return {id, ...payload};
+}
+
+async function loadCheckoutOrders() {
+  requireAdmin();
+  const snap = await getDocs(collection(db,'orders'));
+  return snap.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+}
+
+async function loadOrderPhotos(orderId) {
+  requireAdmin();
+  const snap = await getDocs(collection(db,'orders',String(orderId),'photos'));
+  return snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(Number(a.index)||0)-(Number(b.index)||0));
+}
+
+async function updateCheckoutOrder(orderId, patch) {
+  requireAdmin();
+  await setDoc(doc(db,'orders',String(orderId)), clean({...patch, updatedAt:new Date().toISOString()}), {merge:true});
+}
+
 function currentUser() { return auth.currentUser; }
 function isAdminUser(user = auth.currentUser) { return Boolean(user && user.uid === ADMIN_UID); }
 function requireAdmin() {
@@ -169,6 +237,7 @@ async function compressImageDataUrl(dataUrl, options = {}) {
 window.INKWAVES_FIREBASE = {
   app, db, auth, ADMIN_UID,
   loadMergedData, saveWholeStore,
+  createCheckoutOrder, loadCheckoutOrders, loadOrderPhotos, updateCheckoutOrder, checkoutOrderId,
   signInAdmin, signOutAdmin, waitForAuth,
   currentUser, isAdminUser,
   compressImageDataUrl

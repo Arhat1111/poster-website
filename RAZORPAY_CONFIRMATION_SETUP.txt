@@ -1,0 +1,20 @@
+INKWAVES RAZORPAY CONFIRMATION SETUP — V8.5
+
+The website now saves every checkout order to Firebase BEFORE opening Razorpay. This means the full customer address, cart, sizes, totals and custom-polaroid photos are available in Admin even if the customer closes Razorpay.
+
+CUSTOMER CONFIRMATION
+Razorpay Payment Pages can send automated payment receipts to the customer. In Razorpay:
+1. Open the InkWaves Order Payment page.
+2. Edit Page -> Payment Receipts.
+3. Choose Send Automated Receipts.
+4. Save.
+
+For a branded order-confirmed screen after successful payment:
+1. Edit the Payment Page -> Page Settings.
+2. Under Action after successful payment choose Redirect to your website.
+3. Enter: https://inkwave.co.in/order-confirmed.html
+4. Save/Publish.
+
+ADMIN PAYMENT STATUS
+The website saves order details to Firebase immediately. To automatically mark those orders PAID from captured Razorpay payments, deploy the PRIVATE Razorpay Sync Worker supplied separately and put its workers.dev URL into payment-config.js.
+The Admin refreshes/reconciles payments automatically every 30 seconds while open.
