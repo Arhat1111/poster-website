@@ -1,0 +1,19 @@
+INKWAVES V8.7 PAYMENT SETUP
+
+This build intentionally removed the old customer-decides Razorpay Payment Page because customers could edit the amount.
+
+To enable secure payments:
+1. Deploy the PRIVATE V8.7 worker from the separate private ZIP to Cloudflare Workers.
+2. Copy its workers.dev URL.
+3. Open payment-config.js and paste the URL into window.INKWAVES_PAYMENT_API_BASE.
+4. Upload payment-config.js to GitHub.
+
+Also paste FIREBASE_ORDER_RULES.txt into Firebase Firestore -> Rules -> Publish.
+
+After setup:
+- Checkout order/details are saved to Firebase.
+- Amount is recalculated server-side from Firebase catalog prices.
+- Razorpay generates a unique fixed-amount Payment Link. The customer cannot edit the amount.
+- Admin reads Firebase orders and checks Razorpay status on Refresh Orders.
+
+Security detail: paid orders display server-verified items/prices returned from Razorpay Payment Link notes. The Admin does not trust browser-edited item prices for fulfilment.

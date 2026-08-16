@@ -5,7 +5,7 @@ const formatINR=v=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR
 const escapeHTML=v=>String(v??'').replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':'&quot;'}[c]));
 const clone=v=>JSON.parse(JSON.stringify(v));
 const PAYMENT_API_BASE=String(window.INKWAVES_PAYMENT_API_BASE||'').trim().replace(/\/$/,'');
-const PAYMENT_PAGE_URL=String(window.INKWAVES_RAZORPAY_PAYMENT_PAGE_URL||'').trim();
+const PAYMENT_PAGE_URL=''; // Disabled: customer-decides Payment Pages are not used for secure checkout.
 const paymentApi=path=>`${PAYMENT_API_BASE}${path.startsWith('/')?path:`/${path}`}`;
 const STORE_API_BASE=String(window.INKWAVES_PAYMENT_API_BASE||'').replace(/\/$/,'');
 const storeApiUrl=path=>`${STORE_API_BASE}${path.startsWith('/')?path:`/${path}`}`;
@@ -105,10 +105,8 @@ function addToCart(){const item={key:`${state.activeProduct.id}-${Date.now()}-${
 function selectionPriceForItem(item){if(item.customType==='polaroid'||item.id==='custom-polaroid')return polaroidPrice(item.photoCount);const c=siteData.commerce,p=item.id==='custom'?{sizes:{}}:products.find(x=>x.id===item.id);return(p?productPrice(p,item.options?.size):Number(c.sizes[item.options?.size]?.price||0))+(c.finishes[item.options?.finish]?.price||0)}
 function renderCart(){if(!siteData)return;els.cartCount.textContent=state.cart.reduce((s,i)=>s+i.quantity,0);els.cartItems.innerHTML=state.cart.map(item=>{const pol=item.customType==='polaroid'||item.id==='custom-polaroid';return`<article class="cart-item ${pol?'polaroid-cart-item':''}"><img src="${escapeHTML(item.image||'assets/poster-custom.svg')}" alt=""><div><h4>${escapeHTML(item.name)}</h4>${pol?`<p class="cart-polaroid-note">${item.photoCount} uploaded photo${item.photoCount===1?'':'s'} · custom polaroid print</p>${item.photoCount===20?'<span class="polaroid-bundle-badge">20 FOR ₹100 BUNDLE</span>':''}`:`<p>${escapeHTML(item.options?.size||'A4')} · ${escapeHTML(item.options?.finish||'Matte Laminated')}</p><div class="cart-qty"><button data-qty="minus" data-key="${item.key}">−</button><span>${item.quantity}</span><button data-qty="plus" data-key="${item.key}">+</button></div>`}</div><div><strong>${formatINR(selectionPriceForItem(item)*item.quantity)}</strong><button class="cart-remove" data-remove="${item.key}">Remove</button></div></article>`}).join('');wireImageFallbacks(els.cartItems);const t=calculateCart();els.cartSubtotal.textContent=formatINR(t.rawSubtotal);els.offerSavings.textContent=`− ${formatINR(t.offerSavings)}`;els.cartTotal.textContent=formatINR(t.total);els.checkoutAmount.textContent=formatINR(t.total);els.cartEmpty.hidden=state.cart.length>0;els.cartFooter.hidden=state.cart.length===0;els.couponInput.value=state.coupon;els.couponMessage.textContent=t.coupon?`${siteData.settings.couponCode} applied · saved ${formatINR(t.coupon)}`:'';els.offerMessage.textContent=t.offerSavings?`Size offers applied · you saved ${formatINR(t.offerSavings)}`:(state.cart.some(i=>i.customType==='polaroid')?'Your custom polaroid set is ready for checkout.':'Add more posters in the same size to unlock bundle offers.')}
 function openLayer(el){el.hidden=false;els.overlay.classList.add('active');document.body.classList.add('locked');requestAnimationFrame(()=>el.classList.add('visible'))}function closeLayer(el){el.classList.remove('visible');setTimeout(()=>{el.hidden=true},200);els.overlay.classList.remove('active');document.body.classList.remove('locked')}function openCart(){els.cartDrawer.classList.add('open');els.cartDrawer.setAttribute('aria-hidden','false');els.overlay.classList.add('active');document.body.classList.add('locked')}function closeCart(){els.cartDrawer.classList.remove('open');els.cartDrawer.setAttribute('aria-hidden','true');els.overlay.classList.remove('active');document.body.classList.remove('locked')}function closeMobileMenu(){$('#mobileMenu').classList.remove('open');$('#menuButton').setAttribute('aria-expanded','false')}function showToast(msg,d=2800){els.toast.textContent=msg;els.toast.classList.add('show');clearTimeout(showToast.t);showToast.t=setTimeout(()=>els.toast.classList.remove('show'),d)}function applyFilter(filter,scroll=true){state.filter=filter;$$('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter===filter));renderProducts();closeMobileMenu();if(scroll)$('#shop').scrollIntoView({behavior:'smooth',block:'start'})}
-async function startRazorpayPaymentPage(customer,totals){
-  if(!PAYMENT_PAGE_URL)return false;
-  let url;
-  try{url=new URL(PAYMENT_PAGE_URL)}catch{return false}
+async function startSecureRazorpayPayment(customer,totals){
+  if(!PAYMENT_API_BASE)throw new Error('Secure Razorpay checkout is not connected yet. Deploy the private InkWaves payment worker, then paste its workers.dev URL into payment-config.js.');
   if(!window.INKWAVES_FIREBASE){
     await new Promise((resolve,reject)=>{const t=setTimeout(()=>reject(new Error('Firebase order sync did not load.')),10000);window.addEventListener('inkwaves-firebase-ready',()=>{clearTimeout(t);resolve()},{once:true})});
   }
@@ -121,106 +119,48 @@ async function startRazorpayPaymentPage(customer,totals){
     photoCount:Number(i.photoCount)||0,
     photos:Array.isArray(i.photos)?i.photos:[]
   }));
-  const orderInput={
-    customer,
-    items:orderItems,
-    totals:{...totals},
-    coupon:state.coupon||''
-  };
+  if(!orderItems.length)throw new Error('Your bag is empty.');
+  // Save the full order/photos before payment. If this fails, do not accept money.
   let created;
   try{
-    created=await window.INKWAVES_FIREBASE.createCheckoutOrder(orderInput);
+    created=await window.INKWAVES_FIREBASE.createCheckoutOrder({customer,items:orderItems,totals:{...totals},coupon:state.coupon||''});
   }catch(err){
     const message=String(err?.message||'');
-    const code=String(err?.code||'');
-    const permissionDenied=code.includes('permission-denied')||message.toLowerCase().includes('missing or insufficient permissions');
-    if(!permissionDenied)throw err;
-    const id=window.INKWAVES_FIREBASE.checkoutOrderId();
-    created={id,unsynced:true};
-    const recovery={
-      id,
-      createdAt:new Date().toISOString(),
-      customer,
-      items:orderItems.map(({photos,...item})=>item),
-      totals:{...totals},
-      coupon:state.coupon||'',
-      paymentStatus:'pending',
-      fulfillmentStatus:'New',
-      syncError:'Firebase order-create permission was not published yet.'
-    };
-    try{
-      const existing=JSON.parse(localStorage.getItem('inkwaves-unsynced-orders')||'[]');
-      existing.push(recovery);
-      localStorage.setItem('inkwaves-unsynced-orders',JSON.stringify(existing.slice(-20)));
-    }catch{}
-    console.warn('InkWaves: Firebase order save was denied. Continuing to Razorpay using recovery order',id,err);
-    showToast(`Order ${id} prepared · opening Razorpay. Firebase sync permissions need publishing.`,2600);
+    if(message.toLowerCase().includes('missing or insufficient permissions')||String(err?.code||'').includes('permission-denied')){
+      throw new Error('Order saving is blocked by Firebase rules. Publish the V8.7 Firestore rules before taking payments.');
+    }
+    throw err;
   }
-  url.searchParams.set('amount',String(Math.round(totals.total)));
-  if(customer?.name)url.searchParams.set('full_name',customer.name);
-  if(customer?.email)url.searchParams.set('email',customer.email);
-  if(customer?.phone){
-    const digits=String(customer.phone).replace(/\D/g,'');
-    const indianPhone=digits.length>10&&digits.startsWith('91')?digits.slice(-10):digits;
-    url.searchParams.set('phone',indianPhone);
-  }
-  const summary=state.cart.map(i=>`${i.name||'InkWaves item'} x${Number(i.quantity)||1}`).join(', ').slice(0,150);
-  url.searchParams.set('description',`${created.id} · ${summary||'InkWaves order'}`);
-  const pendingSummary={id:created.id,createdAt:Date.now(),amount:totals.total,customer,cart:orderItems.map(({photos,...i})=>i),unsynced:Boolean(created.unsynced)};
+  const secureCart=orderItems.map(({photos,...i})=>i);
+  const result=await checkoutPost('create-payment-link','/api/create-payment-link',{
+    orderId:created.id,
+    cart:secureCart,
+    coupon:state.coupon||'',
+    customer
+  });
+  if(!result?.shortUrl)throw new Error('Razorpay did not return a secure payment link.');
+  const officialAmount=Number(result.amount)||0;
+  const pendingSummary={id:created.id,createdAt:Date.now(),amount:officialAmount||totals.total,customer,cart:secureCart,paymentLinkId:result.paymentLinkId||''};
   sessionStorage.setItem('inkwaves-pending-order',JSON.stringify(pendingSummary));
   localStorage.setItem('inkwaves-last-order-id',created.id);
   localStorage.setItem('inkwaves-last-order-summary',JSON.stringify(pendingSummary));
-  if(!created.unsynced)showToast(`Order ${created.id} saved · opening Razorpay…`,2200);
-  setTimeout(()=>{window.location.assign(url.toString())},220);
+  showToast(`Order ${created.id} saved · secure Razorpay amount ${formatINR(officialAmount||totals.total)}`,2200);
+  setTimeout(()=>window.location.assign(result.shortUrl),250);
   return true;
 }
 
 async function startRazorpayCheckout(customer){
   try{
     const totals=calculateCart();
-    if(!state.cart.length)throw new Error('Your bag is empty.');
-    if(!PAYMENT_API_BASE){
-      if(await startRazorpayPaymentPage(customer,totals))return;
-      throw new Error('Razorpay payment page is not configured.');
-    }
-    if(!window.Razorpay)throw new Error('Razorpay Checkout could not load. Check your internet connection and try again.');
-    const payload={amount:totals.total,cart:state.cart.map(item=>item.customType==='polaroid'?{id:'custom-polaroid',quantity:1,customType:'polaroid',photoCount:item.photoCount,photos:item.photos||[]}:({id:item.id,quantity:item.quantity,options:{size:item.options.size,finish:item.options.finish}})),coupon:state.coupon,customer};
-    const order=await checkoutPost('create-order','/api/create-order',payload);
-    const checkout=new Razorpay({
-      key:order.keyId,
-      amount:order.amount,
-      currency:order.currency||'INR',
-      name:'InkWaves',
-      description:`InkWaves · ${state.cart.reduce((s,i)=>s+i.quantity,0)} poster(s)`,
-      order_id:order.id,
-      prefill:{name:customer.name,email:customer.email,contact:customer.phone},
-      notes:{store_order_id:order.storeOrderId||''},
-      theme:{color:'#111111'},
-      retry:{enabled:true},
-      handler:async resp=>{
-        try{
-          const result=await checkoutPost('verify-payment','/api/verify-payment',{...resp,storeOrderId:order.storeOrderId});
-          if(!result.verified)throw new Error(result.error||'Payment verification failed.');
-          if(result.paid){
-            state.cart=[];state.coupon='';localStorage.removeItem('inkwave-coupon-v4');saveCart();
-            closeLayer(els.checkoutModal);
-            const invoice=result.invoiceUrl?` Invoice: ${result.invoiceUrl}`:'';
-            showToast(`Payment successful · Order ${result.orderId} confirmed.${invoice}`,8000);
-          }else{
-            showToast(result.message||`Payment verified. Order ${result.orderId} is awaiting capture.`,8000);
-          }
-        }catch(err){showToast(err.message||'Payment verification failed. Please keep your Razorpay payment ID.',8000)}
-      },
-      modal:{ondismiss:()=>showToast('Razorpay checkout closed — your bag is still saved.',5000)}
-    });
+    if(totals.total<=0)throw new Error('Your order total must be greater than zero.');
     closeLayer(els.checkoutModal);
-    checkout.open();
+    await startSecureRazorpayPayment(customer,totals);
   }catch(e){
-    const offline=e?.message==='Failed to fetch'||e instanceof TypeError;
-    const msg=offline?'Razorpay payment service could not be reached. Check payment-config.js and try again.':e.message;
-    showToast(msg,9000);
+    console.error(e);
+    showToast(e?.message||'Secure Razorpay checkout could not start.',7500);
   }
 }
+
 function applyCoupon(){const code=els.couponInput.value.trim().toUpperCase(),valid=(siteData.settings.couponCode||'').toUpperCase();if(code===valid&&valid){state.coupon=code;localStorage.setItem('inkwave-coupon-v4',code);renderCart();showToast(`${code} applied`)}else{state.coupon='';localStorage.removeItem('inkwave-coupon-v4');renderCart();els.couponMessage.textContent=code?'That code is not valid.':''}}
 function bindEvents(){if(els.polaroidUpload)els.polaroidUpload.addEventListener('change',e=>handlePolaroidUpload(e.target.files));if(els.addPolaroidsToBag)els.addPolaroidsToBag.addEventListener('click',addPolaroidsToBag);const reviewTrack=$('#reviewsTrack');if(reviewTrack){const scrollReviews=d=>reviewTrack.scrollBy({left:d*Math.min(reviewTrack.clientWidth*.88,420),behavior:'smooth'});$('#reviewPrev')?.addEventListener('click',()=>scrollReviews(-1));$('#reviewNext')?.addEventListener('click',()=>scrollReviews(1))}document.addEventListener('click',e=>{const pr=e.target.closest('[data-remove-polaroid-preview]');if(pr){state.polaroidPhotos.splice(Number(pr.dataset.removePolaroidPreview),1);renderPolaroidBuilder();return}const qv=e.target.closest('[data-quick-view]');if(qv){e.preventDefault();e.stopPropagation();const p=products.find(x=>x.id===qv.dataset.quickView);if(p)showProductModal(p,false);return}const md=e.target.closest('[data-modal-mockup]');if(md){state.modalMockup=Number(md.dataset.modalMockup)||0;updateModalMockup();return}const f=e.target.closest('[data-filter]');if(f){applyFilter(f.dataset.filter,false);return}const tf=e.target.closest('[data-theme-filter]');if(tf){e.preventDefault();applyFilter(tf.dataset.themeFilter);return}const cp=e.target.closest('[data-custom-product]');if(cp){e.preventDefault();showProductModal(null,true)}});els.productSearch.addEventListener('input',e=>{state.query=e.target.value;renderProducts()});$('#searchToggle').addEventListener('click',()=>{els.searchField.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>els.productSearch.focus(),400)});els.productModal.addEventListener('click',e=>{const o=e.target.closest('[data-option-type]');if(!o)return;state.selection[o.dataset.optionType]=o.dataset.option;[...o.parentElement.children].forEach(c=>c.classList.toggle('active',c===o));updateModalPrice()});$('#modalMockupPrev').addEventListener('click',()=>moveModalMockup(-1));$('#modalMockupNext').addEventListener('click',()=>moveModalMockup(1));els.customUpload.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;if(!f.type.startsWith('image/'))return showToast('Please choose an image.');if(f.size>5*1024*1024)return showToast('Use an image under 5 MB.');const r=new FileReader();r.onload=x=>{setModalArtwork(x.target.result);showToast('Artwork updated')};r.readAsDataURL(f)});$('#addToCartButton').addEventListener('click',addToCart);$$('[data-close-modal]').forEach(b=>b.addEventListener('click',()=>closeLayer(els.productModal)));$('#cartButton').addEventListener('click',openCart);$('#closeCart').addEventListener('click',closeCart);els.cartItems.addEventListener('click',e=>{const q=e.target.closest('[data-qty]'),rm=e.target.closest('[data-remove]');if(q){const i=state.cart.find(x=>x.key===q.dataset.key);if(i){i.quantity=Math.max(1,Math.min(50,i.quantity+(q.dataset.qty==='plus'?1:-1)));saveCart()}}if(rm){state.cart=state.cart.filter(i=>i.key!==rm.dataset.remove);saveCart()}});$('#applyCoupon').addEventListener('click',applyCoupon);els.couponInput.addEventListener('keydown',e=>{if(e.key==='Enter')applyCoupon()});$('#checkoutButton').addEventListener('click',()=>{closeCart();setTimeout(()=>openLayer(els.checkoutModal),220)});$$('[data-close-checkout]').forEach(b=>b.addEventListener('click',()=>closeLayer(els.checkoutModal)));$('#checkoutForm').addEventListener('submit',e=>{e.preventDefault();startRazorpayCheckout(Object.fromEntries(new FormData(e.target)))});els.overlay.addEventListener('click',()=>{if(els.productModal.classList.contains('visible'))closeLayer(els.productModal);else if(els.checkoutModal.classList.contains('visible'))closeLayer(els.checkoutModal);else closeCart()});$('#menuButton').addEventListener('click',e=>{const m=$('#mobileMenu'),open=m.classList.toggle('open');e.currentTarget.setAttribute('aria-expanded',String(open))});$$('#mobileMenu a').forEach(a=>a.addEventListener('click',closeMobileMenu));document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.activeElement?.dataset?.quickView){e.preventDefault();const p=products.find(x=>x.id===document.activeElement.dataset.quickView);if(p)showProductModal(p,false)}if(e.key!=='Escape')return;if(els.productModal.classList.contains('visible'))closeLayer(els.productModal);else if(els.checkoutModal.classList.contains('visible'))closeLayer(els.checkoutModal);else if(els.cartDrawer.classList.contains('open'))closeCart();else closeMobileMenu()})}
 mapElements();loadSite().catch(e=>{console.error(e);showToast('Store preview could not start. Check that all website files are kept together.',6000)});

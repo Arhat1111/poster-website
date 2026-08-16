@@ -150,7 +150,7 @@ async function createCheckoutOrder(orderInput) {
     coupon: orderInput?.coupon || '',
     paymentStatus: 'pending',
     fulfillmentStatus: 'New',
-    paymentSource: 'razorpay-payment-page',
+    paymentSource: 'razorpay-secure-link',
     razorpayPaymentId: '',
     createdAt,
     updatedAt: createdAt
@@ -193,6 +193,7 @@ async function signInAdmin(email, password) {
 }
 
 async function signOutAdmin() { await signOut(auth); }
+async function getAdminIdToken(forceRefresh=false) { requireAdmin(); return auth.currentUser.getIdToken(Boolean(forceRefresh)); }
 function waitForAuth() {
   return new Promise(resolve => {
     const stop = onAuthStateChanged(auth, user => { stop(); resolve(user); });
@@ -238,7 +239,7 @@ window.INKWAVES_FIREBASE = {
   app, db, auth, ADMIN_UID,
   loadMergedData, saveWholeStore,
   createCheckoutOrder, loadCheckoutOrders, loadOrderPhotos, updateCheckoutOrder, checkoutOrderId,
-  signInAdmin, signOutAdmin, waitForAuth,
+  signInAdmin, signOutAdmin, getAdminIdToken, waitForAuth,
   currentUser, isAdminUser,
   compressImageDataUrl
 };
