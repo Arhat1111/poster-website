@@ -270,3 +270,104 @@ footer{background:#111;color:#fff;padding:54px clamp(18px,5vw,72px) 20px}.footer
 @media(max-width:460px){.polaroid-retro-sample{width:100%!important}.polaroid-preview-empty.polaroid-sample-stage{padding:10px!important}}
 
 .payment-waiting{position:fixed;inset:0;z-index:9999;display:none;place-items:center;background:rgba(0,0,0,.58);padding:18px}.payment-waiting.show{display:grid}.payment-waiting>div{width:min(560px,100%);background:#fff;border:1px solid #111;padding:clamp(24px,5vw,46px)}.payment-waiting span{font-size:9px;letter-spacing:.12em}.payment-waiting strong{display:block;font-family:var(--display,Arial);font-size:clamp(34px,6vw,54px);line-height:.95;font-weight:500;margin:12px 0 16px}.payment-waiting p{font-size:12px;line-height:1.7;color:#555}.payment-waiting button{border:1px solid #111;background:#111;color:#fff;padding:13px 17px;font-size:10px;font-weight:600;margin-top:10px}
+
+/* ==========================================================
+   V9.0 — MOBILE CHECKOUT SCROLL FIX
+   The checkout becomes its own iOS-safe scrolling surface.
+   ========================================================== */
+@media (max-width: 760px) {
+  .checkout-modal {
+    left: 8px !important;
+    right: 8px !important;
+    top: max(8px, env(safe-area-inset-top)) !important;
+    bottom: max(8px, env(safe-area-inset-bottom)) !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    transform: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    border-radius: 22px;
+    scroll-behavior: smooth;
+  }
+
+  .checkout-modal.visible {
+    transform: none !important;
+  }
+
+  .checkout-modal .checkout-copy {
+    padding: 38px 18px calc(100px + env(safe-area-inset-bottom));
+    min-height: max-content;
+  }
+
+  .checkout-modal .modal-close {
+    position: sticky;
+    top: 8px;
+    z-index: 20;
+    float: right;
+    width: 42px;
+    height: 42px;
+    margin: -27px -8px 0 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #111;
+    line-height: 1;
+  }
+
+  .checkout-modal h2 {
+    font-size: clamp(44px, 13vw, 68px);
+    line-height: .9;
+    padding-right: 34px;
+  }
+
+  .checkout-modal .checkout-grid,
+  .checkout-modal .checkout-grid.three {
+    grid-template-columns: 1fr;
+  }
+
+  /* 16px prevents iOS Safari zooming into inputs and trapping the viewport. */
+  .checkout-modal input,
+  .checkout-modal select,
+  .checkout-modal textarea {
+    min-height: 52px;
+    font-size: 16px;
+  }
+
+  .checkout-modal .razorpay-payment-card {
+    margin-top: 24px;
+  }
+
+  /* Keep the payment action reachable while the form scrolls. */
+  .checkout-modal .razorpay-pay-button {
+    position: sticky;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    z-index: 15;
+    min-height: 58px;
+    margin-top: 18px;
+    box-shadow: 0 -10px 24px rgba(255,255,255,.96), 0 6px 20px rgba(0,0,0,.14);
+  }
+
+  .checkout-modal .checkout-security-note {
+    display: block;
+    padding: 14px 0 6px;
+  }
+}
+
+@media (max-width: 460px) {
+  .checkout-modal {
+    left: 5px !important;
+    right: 5px !important;
+    top: max(5px, env(safe-area-inset-top)) !important;
+    bottom: max(5px, env(safe-area-inset-bottom)) !important;
+    border-radius: 20px;
+  }
+
+  .checkout-modal .checkout-copy {
+    padding-inline: 16px;
+  }
+}
