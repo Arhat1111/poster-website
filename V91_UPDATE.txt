@@ -1,0 +1,3 @@
+InkWaves V9.1
+- Homepage product section now displays exactly two rows at each responsive breakpoint.
+- View All Products button remains immediately below and links to products.html.
