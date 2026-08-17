@@ -1,0 +1,5 @@
+InkWaves V9.3
+- Fixed Products page Firebase loading with a fresh cache-busted products-v93.js loader.
+- Product category filtering now matches category IDs case-insensitively.
+- Homepage sequence: Shop by Category -> Polaroids -> This Week's Wall Drop -> Customize -> Bestsellers.
+- Navigation order updated to match the new homepage flow.

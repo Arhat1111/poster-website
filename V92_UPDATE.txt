@@ -1,0 +1,1 @@
+V9.2: Homepage Shop by Category converted to horizontal swipe/arrow carousel with responsive cards and progress indicator.
