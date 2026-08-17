@@ -6,9 +6,9 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <meta content="InkWave — affordable 300 GSM posters and custom prints by student founders from NITK Surathkal." name="description"/>
 <meta content="#ffffff" name="theme-color"/>
-<title>InkWave — Posters for walls with personality · V9.3</title>
+<title>InkWave — Posters for walls with personality · V9.4</title>
 <link href="assets/inkwaves-icon.webp" rel="icon" type="image/webp"/>
-<link href="styles.css?v=93" rel="stylesheet"/>
+<link href="styles.css?v=94" rel="stylesheet"/>
 </head>
 <body>
 <header class="site-header site-header-clean">
@@ -17,7 +17,7 @@
 <nav aria-label="Primary navigation" class="desktop-nav desktop-nav-clean">
 <div class="nav-menu-group">
 <button aria-haspopup="true" class="nav-menu-trigger" type="button">SHOP <span>⌄</span></button>
-<div class="nav-menu-dropdown"><a href="#categories"><small>01</small><span>Categories</span></a><a href="#offers"><small>02</small><span>This Week's Wall Drop</span></a><a href="#shop"><small>03</small><span>Bestsellers</span></a></div>
+<div class="nav-menu-dropdown"><a href="#categories"><small>01</small><span>Categories</span></a><a href="#offers"><small>02</small><span>This Week's Wall Drop</span></a><a href="#shop"><small>03</small><span>Studio Picks</span></a></div>
 </div>
 
 
@@ -38,7 +38,7 @@
 </div>
 </header>
 <nav aria-label="Poster categories" class="category-bar navbar-category-bar" id="categoryBar"></nav>
-<nav class="mobile-menu" id="mobileMenu"><a href="#categories">Shop by Category</a><a href="#custom-polaroid">Custom Polaroids</a><a href="#offers">This Week's Wall Drop</a><a href="#custom">Custom Posters</a><a href="#shop">Shop Bestsellers</a><a href="#about-preview">Why InkWave</a><a href="#reviews">Customer Reviews</a><a href="#story">About</a></nav>
+<nav class="mobile-menu" id="mobileMenu"><a href="#categories">Shop by Category</a><a href="#offers">This Week's Wall Drop</a><a href="#custom-polaroid">Polaroids</a><a href="#shop">InkWave Studio Picks</a><a href="#custom">Start Customizing</a><a href="#reviews">Customer Reviews</a><a href="#about-preview">Why InkWave</a><a href="#story">About</a></nav>
 <main id="top">
 <section class="hero">
 <div class="hero-copy">
@@ -64,6 +64,9 @@
 <button aria-label="Next categories" class="category-carousel-arrow category-carousel-next" id="categoryNext" type="button">→</button>
 </div>
 <div aria-hidden="true" class="category-slider-meta"><span id="categorySliderStatus">01 / 01</span><div class="category-slider-progress"><i id="categorySliderThumb"></i></div><span>SWIPE TO EXPLORE</span></div>
+</section><section class="offers section-pad" id="offers">
+<div class="title-row drop-title-row"><div><p class="overline drop-overline">NITK FRESHER DROP — LIMITED STOCK</p><h2>THIS WEEK'S WALL DROP</h2></div><p class="section-description">Limited-stock poster deals for this week. Mix designs in the same size and eligible bundle savings are calculated automatically in your bag.</p></div>
+<div class="offer-grid" id="offerGrid"></div>
 </section><section class="custom-polaroid-section section-pad" data-build="v7.9" id="custom-polaroid">
 <div class="polaroid-builder-copy">
 <p class="overline">CUSTOMIZED POLAROIDS</p>
@@ -91,26 +94,23 @@
 <button class="button button-dark" disabled="" id="addPolaroidsToBag" type="button">ADD POLAROIDS TO BAG →</button>
 </div>
 </div>
-</section><section class="offers section-pad" id="offers">
-<div class="title-row drop-title-row"><div><p class="overline drop-overline">NITK FRESHER DROP — LIMITED STOCK</p><h2>THIS WEEK'S WALL DROP</h2></div><p class="section-description">Limited-stock poster deals for this week. Mix designs in the same size and eligible bundle savings are calculated automatically in your bag.</p></div>
-<div class="offer-grid" id="offerGrid"></div>
+</section><section class="shop section-pad" id="shop">
+<div class="title-row"><div><p class="overline">INKWAVE STUDIO PICK</p><h2 id="shopTitle">BEST SELLERS</h2></div><p class="section-description">Every poster is available in all four sizes with transparent, fixed pricing.</p></div>
+<div class="shop-toolbar"><div class="filter-chips" id="filterChips"></div><label class="search-field" id="searchField"><svg viewbox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><input id="productSearch" placeholder="Search InkWave" type="search"/></label></div>
+<div class="product-grid" id="productGrid"></div><div class="empty-state" hidden="" id="emptyState">New posters are being added soon.</div><div class="home-products-cta"><a class="button button-dark" href="products.html">VIEW ALL PRODUCTS →</a></div>
 </section><section class="custom-section section-pad" id="custom">
 <div class="custom-copy"><p class="overline">CUSTOM POSTERS</p><h2 id="customTitle">BUILD A POSTER THAT IS COMPLETELY YOURS.</h2><p id="customDescription"></p><div class="custom-points"><span>01 · UPLOAD</span><span>02 · PICK SIZE</span><span>03 · PREVIEW</span><span>04 · ORDER</span></div><button class="button button-dark" data-custom-product="">START CUSTOMIZING →</button></div>
 <div class="custom-stage"><div class="custom-grid"></div><div class="custom-poster custom-back"><img alt="Custom poster example" src="assets/poster-chaos.svg"/></div><div class="custom-poster custom-front"><img alt="Custom poster preview" src="assets/poster-custom.svg"/></div><div class="custom-sticker">YOUR ART<br/>YOUR WALL ✦</div></div>
-</section><section class="shop section-pad" id="shop">
-<div class="title-row"><div><p class="overline">BESTSELLERS</p><h2 id="shopTitle">SHOP BESTSELLERS</h2></div><p class="section-description">Every poster is available in all four sizes with transparent, fixed pricing.</p></div>
-<div class="shop-toolbar"><div class="filter-chips" id="filterChips"></div><label class="search-field" id="searchField"><svg viewbox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><input id="productSearch" placeholder="Search InkWave" type="search"/></label></div>
-<div class="product-grid" id="productGrid"></div><div class="empty-state" hidden="" id="emptyState">New posters are being added soon.</div><div class="home-products-cta"><a class="button button-dark" href="products.html">VIEW ALL PRODUCTS →</a></div>
-</section><section class="quality-grid section-pad" id="about-preview"><div class="why-heading"><p class="overline">WHY INKWAVE</p><h2>MADE FOR BETTER WALLS.</h2></div>
-<article><span>01</span><h3>300 GSM QUALITY</h3><p>Thick paper stock that feels substantial and holds colour sharply.</p></article>
-<article><span>02</span><h3>CUSTOM CREATIONS</h3><p>Turn your own photos, graphics and artwork into an InkWave print.</p></article>
-<article><span>03</span><h3>MATTE LAMINATED PAPER</h3><p>A low-glare laminated finish designed for cleaner-looking wall displays.</p></article>
 </section><section class="reviews-section section-pad" id="reviews">
 <div class="title-row reviews-heading"><div><p class="overline">FROM THE INKWAVE COMMUNITY</p><h2>CUSTOMER WALL PHOTOS / REVIEWS</h2></div><div class="review-summary"><strong id="reviewAverage">5.0</strong><span aria-hidden="true" class="review-summary-stars">★★★★★</span><small id="reviewCount">Customer reviews</small></div></div>
 <div class="reviews-viewport">
 <div class="reviews-track" id="reviewsTrack"></div>
 </div>
 <div class="reviews-footer"><p>Reviews are managed from the InkWave control panel.</p><div class="review-controls"><button aria-label="Previous reviews" id="reviewPrev">←</button><button aria-label="Next reviews" id="reviewNext">→</button></div></div>
+</section><section class="quality-grid section-pad" id="about-preview"><div class="why-heading"><p class="overline">WHY INKWAVE</p><h2>MADE FOR BETTER WALLS.</h2></div>
+<article><span>01</span><h3>300 GSM QUALITY</h3><p>Thick paper stock that feels substantial and holds colour sharply.</p></article>
+<article><span>02</span><h3>CUSTOM CREATIONS</h3><p>Turn your own photos, graphics and artwork into an InkWave print.</p></article>
+<article><span>03</span><h3>MATTE LAMINATED PAPER</h3><p>A low-glare laminated finish designed for cleaner-looking wall displays.</p></article>
 </section><section class="story section-pad" id="story">
 <div class="story-visual"><div class="story-sun"></div><div class="story-type">NITK<br/>SURATHKAL</div><div class="story-wave"></div><span>WHERE INKWAVE STARTED</span></div>
 <div class="story-copy"><p class="overline">ABOUT INKWAVE</p><h2 id="aboutTitle">FROM A HOSTEL ROOM TO YOUR WALL.</h2><p id="aboutBody"></p><a href="about.html">READ OUR STORY →</a></div>
@@ -138,6 +138,6 @@
 </div>
 <div aria-labelledby="checkoutTitle" aria-modal="true" class="modal checkout-modal" hidden="" id="checkoutModal" role="dialog"><button class="modal-close" data-close-checkout="">×</button><div class="checkout-copy"><span class="overline">FINAL CHECKOUT</span><h2 id="checkoutTitle">DELIVERY DETAILS</h2><p>Enter your delivery details, then complete your payment securely with Razorpay.</p><form id="checkoutForm"><label>FULL NAME<input autocomplete="name" name="name" required=""/></label><div class="checkout-grid"><label>EMAIL<input autocomplete="email" name="email" required="" type="email"/></label><label>MOBILE NUMBER<input autocomplete="tel" inputmode="numeric" name="phone" pattern="[0-9]{10}" required="" type="tel"/></label></div><label>DELIVERY ADDRESS<input autocomplete="street-address" name="address" required=""/></label><div class="checkout-grid three"><label>CITY<input name="city" required=""/></label><label>STATE<input name="state" required=""/></label><label>PIN CODE<input inputmode="numeric" name="pincode" pattern="[0-9]{6}" required=""/></label></div><label class="whatsapp-optin"><input checked="" name="whatsappOptIn" type="checkbox" value="yes"/><span>Send my paid-order confirmation and invoice link to this mobile number on WhatsApp.</span></label><div class="razorpay-payment-card"><div class="razorpay-payment-head"><div><span>PAYMENT METHOD</span><strong>Razorpay Secure Checkout</strong></div><span class="secure-pill">SECURE</span></div><div class="razorpay-methods"><span>UPI</span><span>CARDS</span><span>NETBANKING</span><span>WALLETS</span></div><p>You will be redirected to Razorpay to complete the payment securely.</p></div><button class="button button-dark full razorpay-pay-button" type="submit"><span>PAY SECURELY</span><strong id="checkoutAmount">₹0</strong></button></form><small class="checkout-security-note">Payment is completed on Razorpay. InkWaves does not collect or store your card or UPI credentials.</small></div></div>
 <div class="toast" id="toast" role="status"></div>
-<script src="default-data.js"></script><script src="firebase-store.js?v=93" type="module"></script><script src="payment-config.js?v=93"></script><script src="app.js?v=93"></script>
+<script src="default-data.js"></script><script src="firebase-store.js?v=94" type="module"></script><script src="payment-config.js?v=94"></script><script src="app.js?v=94"></script>
 </body>
 </html>

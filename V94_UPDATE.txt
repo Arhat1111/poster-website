@@ -1,0 +1,4 @@
+InkWaves V9.4
+- Homepage sequence: Hero → Shop by Category → This Week's Wall Drop → Polaroids → InkWave Studio Picks / Best Sellers → Start Customizing → Customer Reviews → remaining sections.
+- Reviews Admin now supports customer/person photo upload.
+- Review portraits are compressed for Firestore and displayed with reviews on the storefront.
