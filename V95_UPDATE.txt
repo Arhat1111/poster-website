@@ -1,0 +1,10 @@
+INKWAVES V9.5 — REVIEW PRODUCT PHOTO GALLERIES
+
+Admin -> Reviews now supports:
+- customer/person profile photo
+- up to 4 product-received photos per review
+- preview and remove controls
+
+Public review cards show the received-product gallery.
+
+Review media is stored in separate Firebase settings documents, so it stays synced across devices without Firebase Storage and without changing your existing Firestore rules.

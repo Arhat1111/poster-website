@@ -1,4 +1,4 @@
-INKWAVES FIRESTORE RULES — V8.9
+INKWAVES FIRESTORE RULES — V9.5
 
 Paste ONLY the rule block below into Firebase Console -> Firestore Database -> Rules -> Publish.
 These rules let customers CREATE a pending order and its compressed custom poster / polaroid images, but nobody can read or modify customer orders except your authenticated InkWaves admin.

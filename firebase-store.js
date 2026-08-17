@@ -38,12 +38,45 @@ async function readCollection(name) {
   return snap.docs.map(d => ({ id: d.id, ...stripMeta(d.data()) })).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));
 }
 
+async function readReviewMedia() {
+  const snap = await getDocs(collection(db, 'settings'));
+  return snap.docs
+    .filter(d => d.id.startsWith('review-media-'))
+    .map(d => ({ id: d.id.slice('review-media-'.length), ...stripMeta(d.data()) }));
+}
+
+async function syncReviewMedia(currentItems, previousItems) {
+  const next = new Map((currentItems || []).map(item => [String(item.id), clean(item)]));
+  const prev = new Map((previousItems || []).map(item => [String(item.id), clean(item)]));
+  const jobs = [];
+  for (const [id, item] of next) {
+    const old = prev.get(id);
+    if (!old || stable(old) !== stable(item)) {
+      const payload = { ...item };
+      delete payload.id;
+      jobs.push(() => setDoc(doc(db, 'settings', `review-media-${id}`), payload));
+    }
+  }
+  for (const id of prev.keys()) {
+    if (!next.has(id)) jobs.push(() => deleteDoc(doc(db, 'settings', `review-media-${id}`)));
+  }
+  for (let i = 0; i < jobs.length; i += 20) {
+    await Promise.all(jobs.slice(i, i + 20).map(fn => fn()));
+  }
+}
+
+function reviewId(review, index) {
+  const current = String(review?.id || '').trim();
+  return current || `review-${String(index + 1).padStart(3,'0')}`;
+}
+
 async function loadMergedData(baseData) {
   const base = clone(baseData || { settings:{}, heroSlides:[], categories:[], products:[], commerce:{sizes:{},finishes:{}}, reviews:[] });
   try {
-    const [products, categories, settingsSnap] = await Promise.all([
+    const [products, categories, reviewMedia, settingsSnap] = await Promise.all([
       readCollection('products'),
       readCollection('categories'),
+      readReviewMedia(),
       getDoc(doc(db, 'settings', 'store'))
     ]);
     if (settingsSnap.exists()) {
@@ -53,7 +86,17 @@ async function loadMergedData(baseData) {
       if (Array.isArray(s.heroSlides)) base.heroSlides = s.heroSlides;
       if (Array.isArray(s.reviews)) base.reviews = s.reviews;
     }
-    // Firestore is the source of truth for catalog data. Empty collections mean an empty catalog.
+    const mediaById = new Map(reviewMedia.map(m => [String(m.id), m]));
+    base.reviews = (base.reviews || []).map((review,index) => {
+      const id = reviewId(review,index);
+      const media = mediaById.get(id) || {};
+      return {
+        ...review,
+        id,
+        image: media.avatar || review.image || '',
+        productImages: Array.isArray(media.productImages) ? media.productImages : (Array.isArray(review.productImages) ? review.productImages : [])
+      };
+    });
     base.products = products;
     base.categories = categories;
     lastLoaded = clone(base);
@@ -92,17 +135,37 @@ async function syncCollection(name, currentItems, previousItems) {
 async function saveWholeStore(data) {
   requireAdmin();
   const current = clean(data);
-  const previous = lastLoaded || { products:[], categories:[] };
+  const previous = lastLoaded || { products:[], categories:[], reviews:[] };
+  current.reviews = (current.reviews || []).map((review,index) => ({
+    ...review,
+    id: reviewId(review,index),
+    productImages: Array.isArray(review.productImages) ? review.productImages.slice(0,4) : []
+  }));
+  const reviewMedia = current.reviews.map((review,index) => ({
+    id: reviewId(review,index),
+    avatar: review.image || '',
+    productImages: Array.isArray(review.productImages) ? review.productImages.slice(0,4) : []
+  }));
+  const previousReviewMedia = (previous.reviews || []).map((review,index) => ({
+    id: reviewId(review,index),
+    avatar: review.image || '',
+    productImages: Array.isArray(review.productImages) ? review.productImages.slice(0,4) : []
+  }));
   await Promise.all([
     syncCollection('products', current.products || [], previous.products || []),
-    syncCollection('categories', current.categories || [], previous.categories || [])
+    syncCollection('categories', current.categories || [], previous.categories || []),
+    syncReviewMedia(reviewMedia, previousReviewMedia)
   ]);
+  const reviewMetadata = current.reviews.map(review => {
+    const { image, productImages, ...metadata } = review;
+    return metadata;
+  });
   const settingsPayload = clean({
     settings: current.settings || {},
     commerce: current.commerce || {},
     heroSlides: current.heroSlides || [],
-    reviews: current.reviews || [],
-    schemaVersion: 72
+    reviews: reviewMetadata,
+    schemaVersion: 95
   });
   await setDoc(doc(db, 'settings', 'store'), settingsPayload);
   lastLoaded = clone(current);
