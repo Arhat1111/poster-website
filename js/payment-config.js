@@ -1,0 +1,4 @@
+window.INKWAVES_PAYMENT_API_BASE = 'https://inkwaves-payments.imagephotoshoot3.workers.dev';
+window.INKWAVES_RAZORPAY_PAYMENT_PAGE_URL = '';
+window.INKWAVES_RAZORPAY_SYNC_API_BASE = window.INKWAVES_PAYMENT_API_BASE;
+window.INKWAVES_ADMIN_API_BASE = window.INKWAVES_PAYMENT_API_BASE;

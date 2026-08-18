@@ -6,9 +6,9 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <meta content="InkWave — affordable 300 GSM posters and custom prints by student founders from NITK Surathkal." name="description"/>
 <meta content="#ffffff" name="theme-color"/>
-<title>InkWave — Posters for walls with personality · V9.4</title>
+<title>InkWave — Posters for walls with personality</title>
 <link href="assets/inkwaves-icon.webp" rel="icon" type="image/webp"/>
-<link href="styles.css?v=95" rel="stylesheet"/>
+<link href="css/styles.css" rel="stylesheet"/>
 </head>
 <body>
 <header class="site-header site-header-clean">
@@ -67,7 +67,7 @@
 </section><section class="offers section-pad" id="offers">
 <div class="title-row drop-title-row"><div><p class="overline drop-overline">NITK FRESHER DROP — LIMITED STOCK</p><h2>THIS WEEK'S WALL DROP</h2></div><p class="section-description">Limited-stock poster deals for this week. Mix designs in the same size and eligible bundle savings are calculated automatically in your bag.</p></div>
 <div class="offer-grid" id="offerGrid"></div>
-</section><section class="custom-polaroid-section section-pad" data-build="v7.9" id="custom-polaroid">
+</section><section class="custom-polaroid-section section-pad" id="custom-polaroid">
 <div class="polaroid-builder-copy">
 <p class="overline">CUSTOMIZED POLAROIDS</p>
 <h2>TURN YOUR PHOTOS INTO POLAROIDS.</h2>
@@ -85,7 +85,7 @@
 <span>UPLOAD PHOTOS</span><small>JPG, PNG or WebP · maximum 20 photos</small>
 </label>
 <div aria-label="Sample custom polaroid preview" class="polaroid-preview-empty polaroid-sample-stage" id="polaroidPreviewEmpty">
-<img alt="Customized polaroid wall display with printed photos and warm fairy lights" class="polaroid-retro-sample" src="assets/polaroid-wall-sample.webp?v=83"/>
+<img alt="Customized polaroid wall display with printed photos and warm fairy lights" class="polaroid-retro-sample" src="assets/polaroid-wall-sample.webp"/>
 <div class="sample-polaroid-copy"><strong>CUSTOMIZED POLAROIDS, MADE FROM YOUR PHOTOS.</strong><span>Upload your photos above to create your own polaroid wall set.</span></div>
 </div>
 <div class="polaroid-preview-grid" id="polaroidPreviewGrid"></div>
@@ -138,6 +138,6 @@
 </div>
 <div aria-labelledby="checkoutTitle" aria-modal="true" class="modal checkout-modal" hidden="" id="checkoutModal" role="dialog"><button class="modal-close" data-close-checkout="">×</button><div class="checkout-copy"><span class="overline">FINAL CHECKOUT</span><h2 id="checkoutTitle">DELIVERY DETAILS</h2><p>Enter your delivery details, then complete your payment securely with Razorpay.</p><form id="checkoutForm"><label>FULL NAME<input autocomplete="name" name="name" required=""/></label><div class="checkout-grid"><label>EMAIL<input autocomplete="email" name="email" required="" type="email"/></label><label>MOBILE NUMBER<input autocomplete="tel" inputmode="numeric" name="phone" pattern="[0-9]{10}" required="" type="tel"/></label></div><label>DELIVERY ADDRESS<input autocomplete="street-address" name="address" required=""/></label><div class="checkout-grid three"><label>CITY<input name="city" required=""/></label><label>STATE<input name="state" required=""/></label><label>PIN CODE<input inputmode="numeric" name="pincode" pattern="[0-9]{6}" required=""/></label></div><label class="whatsapp-optin"><input checked="" name="whatsappOptIn" type="checkbox" value="yes"/><span>Send my paid-order confirmation and invoice link to this mobile number on WhatsApp.</span></label><div class="razorpay-payment-card"><div class="razorpay-payment-head"><div><span>PAYMENT METHOD</span><strong>Razorpay Secure Checkout</strong></div><span class="secure-pill">SECURE</span></div><div class="razorpay-methods"><span>UPI</span><span>CARDS</span><span>NETBANKING</span><span>WALLETS</span></div><p>You will be redirected to Razorpay to complete the payment securely.</p></div><button class="button button-dark full razorpay-pay-button" type="submit"><span>PAY SECURELY</span><strong id="checkoutAmount">₹0</strong></button></form><small class="checkout-security-note">Payment is completed on Razorpay. InkWaves does not collect or store your card or UPI credentials.</small></div></div>
 <div class="toast" id="toast" role="status"></div>
-<script src="default-data.js"></script><script src="firebase-store.js?v=95" type="module"></script><script src="payment-config.js?v=95"></script><script src="app.js?v=95"></script>
+<script src="js/default-data.js"></script><script src="js/firebase-store.js" type="module"></script><script src="js/payment-config.js"></script><script src="js/app.js"></script>
 </body>
 </html>
