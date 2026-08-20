@@ -1,0 +1,9 @@
+InkWaves V9.9
+
+Fixes:
+- Legacy products in settings/store are merged with the modern Firestore products collection instead of being hidden.
+- Remove Product deletes that one product directly from Firebase, its media document, and any legacy catalog copy.
+- The bulk-empty-catalog safety guard remains in place for accidental full catalog overwrites.
+
+Deploy: replace the website files on GitHub with this package and hard refresh the site/admin page.
+No Cloudflare Worker or Firestore rule change is required.
