@@ -1,0 +1,3 @@
+InkWaves V10.1
+
+Storefront product order is randomized once per page load. Filters/search/load-more preserve the shuffled order for that visit. Admin product order is unchanged.
