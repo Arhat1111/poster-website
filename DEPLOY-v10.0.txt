@@ -1,0 +1,3 @@
+InkWaves V10.0
+
+Upload all files in this package. Log in to Admin > Products and use Restore missing archived products once. The restore only creates archived product/category IDs that are missing from Firebase and never overwrites current IDs. After the restore completes, verify the storefront and keep archived-catalog.json in the deployment only if you want the recovery button to remain usable.
