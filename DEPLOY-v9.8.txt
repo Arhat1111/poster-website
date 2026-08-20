@@ -1,0 +1,9 @@
+InkWaves V9.8 stability fix
+
+1. Replace the live GitHub Pages files with this package.
+2. Commit/push and wait for Pages deployment.
+3. Hard refresh admin.html and the storefront.
+4. This build uses new physical JS filenames to prevent mixed old/new browser cache.
+5. No Firebase Rules or Cloudflare Worker changes are required.
+
+Important: if products were previously deleted from Firestore by the old browser-import tool, code cannot reconstruct those deleted records automatically. V9.8 will recover an older catalog only if a legacy copy still exists in settings/store.
