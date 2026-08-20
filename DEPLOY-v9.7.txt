@@ -1,0 +1,12 @@
+InkWaves v9.7 — catalog safety + storefront performance
+
+1. Upload all files in this package to the GitHub Pages repository.
+2. Hard refresh inkwave.co.in once after GitHub finishes deploying.
+3. Open /admin.html and sign in once. The admin automatically moves large inline
+   product/category image data into separate Firebase media documents. This is a
+   safe one-time optimization and keeps the public catalog metadata lightweight.
+4. The old "Import old browser catalog" control has been removed permanently.
+
+Important: if Firestore product documents were already deleted by the old import
+button before v9.7 was installed, code cannot reconstruct those deleted documents.
+Restore them from an earlier export/admin backup if available, or re-add them.
